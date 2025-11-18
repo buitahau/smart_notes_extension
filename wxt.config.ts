@@ -56,6 +56,6 @@ export default defineConfig({
     name: 'Smart Notes',
     description: 'Smart Notes Chrome Extension',
     version: '1.0.0',
-    permissions: ['storage', 'activeTab', 'notifications', 'alarms'],
+    permissions: ['storage', 'notifications', 'alarms'],
   },
 });
