@@ -33,13 +33,19 @@ export const Input: React.FC<InputProps> = ({
           rows={1}
           onFocus={(e) => {
             e.currentTarget.parentElement!.style.cssText = `
-              ${Object.entries(styles.inputWrapper).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`).join('; ')}
-              ${Object.entries(styles.inputWrapperFocus).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`).join('; ')}
+              ${Object.entries(styles.inputWrapper)
+                .map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`)
+                .join('; ')}
+              ${Object.entries(styles.inputWrapperFocus)
+                .map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`)
+                .join('; ')}
             `;
           }}
           onBlur={(e) => {
             e.currentTarget.parentElement!.style.cssText = `
-              ${Object.entries(styles.inputWrapper).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`).join('; ')}
+              ${Object.entries(styles.inputWrapper)
+                .map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`)
+                .join('; ')}
             `;
           }}
         />

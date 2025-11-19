@@ -76,8 +76,7 @@ const showTaskReminderNotification = async () => {
       return;
     }
 
-    const storedMessages =
-      (await storage.get<StoredMessage[]>(STORAGE_KEYS.CHAT_MESSAGES)) ?? [];
+    const storedMessages = (await storage.get<StoredMessage[]>(STORAGE_KEYS.CHAT_MESSAGES)) ?? [];
 
     if (storedMessages.length === 0) return;
 

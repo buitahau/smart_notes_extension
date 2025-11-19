@@ -5,7 +5,6 @@ import { useMiniRouter } from '@context/router-context';
 import { useChat } from '@context/chat-context';
 import { STORAGE_KEYS } from '@utils/constants';
 import { UserDetails } from '@types/login';
-import { Note } from '@services/note-service';
 import { queryService } from '@services/query-service';
 import { Message } from '@context/chat-context';
 import { Header } from './Header';
@@ -33,7 +32,8 @@ export const Home: React.FC = () => {
           {
             id: '1',
             type: 'ai',
-            content: "Hello! 👋 I'm your AI assistant. I can help you with:\n\n• Finding your notes for today\n• Creating new notes\n• Organizing your thoughts\n\nWhat would you like to do?",
+            content:
+              "Hello! 👋 I'm your AI assistant. I can help you with:\n\n• Finding your notes for today\n• Creating new notes\n• Organizing your thoughts\n\nWhat would you like to do?",
             timestamp: new Date().toISOString(),
           },
         ]);
@@ -86,17 +86,22 @@ export const Home: React.FC = () => {
       const notesData = response.notes;
 
       // Remove loading message and add AI response
-      const filteredMessages = updatedMessages.filter((msg: Message) => msg.id !== loadingMessageId);
+      const filteredMessages = updatedMessages.filter(
+        (msg: Message) => msg.id !== loadingMessageId
+      );
       let aiResponse: Message;
 
       // Ensure notesData.data is always an array
       const notesArray = Array.isArray(notesData.data) ? notesData.data : [];
 
-      if ((notesData.intent === 'task_list' || notesData.intent === 'date_lookup') && notesArray.length > 0) {
+      if (
+        (notesData.intent === 'task_list' || notesData.intent === 'date_lookup') &&
+        notesArray.length > 0
+      ) {
         aiResponse = {
           id: `ai-${Date.now()}`,
           type: 'ai',
-          content: "Here are your tasks:",
+          content: 'Here are your tasks:',
           timestamp: new Date().toISOString(),
           notes: notesArray,
           intent: notesData.intent,
@@ -105,7 +110,7 @@ export const Home: React.FC = () => {
         aiResponse = {
           id: `ai-${Date.now()}`,
           type: 'ai',
-          content: notesArray.length > 0 ? "Here are your notes:" : "No notes found.",
+          content: notesArray.length > 0 ? 'Here are your notes:' : 'No notes found.',
           timestamp: new Date().toISOString(),
           notes: notesArray,
           intent: notesData.intent,
@@ -114,11 +119,13 @@ export const Home: React.FC = () => {
       setMessages([...filteredMessages, aiResponse]);
     } catch (error) {
       // Remove loading message and add error response
-      const filteredMessages = updatedMessages.filter((msg: Message) => msg.id !== loadingMessageId);
+      const filteredMessages = updatedMessages.filter(
+        (msg: Message) => msg.id !== loadingMessageId
+      );
       const errorResponse: Message = {
         id: `error-${Date.now()}`,
         type: 'ai',
-        content: "Sorry, I encountered an error while processing your request. Please try again.",
+        content: 'Sorry, I encountered an error while processing your request. Please try again.',
         timestamp: new Date().toISOString(),
       };
       setMessages([...filteredMessages, errorResponse]);
@@ -161,7 +168,7 @@ export const Home: React.FC = () => {
           .filter((value) => Boolean(value && value.trim()))
           .join(' ')
           .trim();
-        setUserName(composedName || userDetail.username || userDetail.email || '');
+        setUserName(composedName || userDetail.email || '');
       } else {
         setUserName('');
       }
@@ -336,11 +343,7 @@ export const Home: React.FC = () => {
         <div style={styles.messagesArea} id="messages-area">
           <div style={styles.messagesWrapper}>
             {messages.map((message) => (
-              <MessageComponent
-                key={message.id}
-                message={message}
-                styles={styles}
-              />
+              <MessageComponent key={message.id} message={message} styles={styles} />
             ))}
           </div>
         </div>

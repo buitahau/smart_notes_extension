@@ -12,7 +12,7 @@ export function LoadingSpinner({
   message,
   size = 'medium',
   fullScreen = false,
-  overlay = false
+  overlay = false,
 }: LoadingSpinnerProps) {
   const containerClass = `
     loading-spinner-container

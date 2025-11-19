@@ -44,7 +44,8 @@ export const Header: React.FC<HeaderProps> = ({
           }}
           onClick={onToggleUserMenu}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = styles.userSectionHover.backgroundColor || '#f8fafc';
+            e.currentTarget.style.backgroundColor =
+              styles.userSectionHover.backgroundColor || '#f8fafc';
             e.currentTarget.style.borderColor = styles.userSectionHover.borderColor || '#e2e8f0';
           }}
           onMouseLeave={(e) => {
@@ -70,7 +71,8 @@ export const Header: React.FC<HeaderProps> = ({
               style={styles.menuItem}
               onClick={onProfile}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = styles.menuItemHover.backgroundColor || '#f8fafc';
+                e.currentTarget.style.backgroundColor =
+                  styles.menuItemHover.backgroundColor || '#f8fafc';
                 e.currentTarget.style.color = styles.menuItemHover.color || '#6366f1';
               }}
               onMouseLeave={(e) => {
@@ -101,7 +103,8 @@ export const Header: React.FC<HeaderProps> = ({
               style={styles.menuItem}
               onClick={onLogout}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = styles.menuItemHover.backgroundColor || '#f8fafc';
+                e.currentTarget.style.backgroundColor =
+                  styles.menuItemHover.backgroundColor || '#f8fafc';
                 e.currentTarget.style.color = styles.menuItemHover.color || '#6366f1';
               }}
               onMouseLeave={(e) => {
@@ -122,13 +125,17 @@ export const Header: React.FC<HeaderProps> = ({
         }}
         onClick={onCreateNote}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = styles.createButtonHover.backgroundColor || '#4f46e5';
-          e.currentTarget.style.boxShadow = styles.createButtonHover.boxShadow || '0 6px 16px rgba(99, 102, 241, 0.4)';
-          e.currentTarget.style.transform = styles.createButtonHover.transform || 'translateY(-1px)';
+          e.currentTarget.style.backgroundColor =
+            styles.createButtonHover.backgroundColor || '#4f46e5';
+          e.currentTarget.style.boxShadow =
+            styles.createButtonHover.boxShadow || '0 6px 16px rgba(99, 102, 241, 0.4)';
+          e.currentTarget.style.transform =
+            styles.createButtonHover.transform || 'translateY(-1px)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = styles.createButton.backgroundColor || '#6366f1';
-          e.currentTarget.style.boxShadow = styles.createButton.boxShadow || '0 4px 12px rgba(99, 102, 241, 0.3)';
+          e.currentTarget.style.boxShadow =
+            styles.createButton.boxShadow || '0 4px 12px rgba(99, 102, 241, 0.3)';
           e.currentTarget.style.transform = 'none';
         }}
       >

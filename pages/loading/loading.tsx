@@ -32,11 +32,7 @@ export function Loading({ message = 'Smart Notes is loading...', size = 'large' 
 
   return (
     <div className="loading-page">
-      <LoadingSpinner
-        message={message}
-        size={size}
-        fullScreen={false}
-      />
+      <LoadingSpinner message={message} size={size} fullScreen={false} />
     </div>
   );
 }

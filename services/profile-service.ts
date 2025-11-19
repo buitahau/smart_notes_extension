@@ -14,10 +14,7 @@ class ProfileService {
   }
 
   async updateProfile(payload: UpdateProfilePayload): Promise<UserProfile> {
-    const response = await apiClient.put<UserProfileResponse>(
-      API_ENDPOINTS.PROFILE.BASE,
-      payload
-    );
+    const response = await apiClient.put<UserProfileResponse>(API_ENDPOINTS.PROFILE.BASE, payload);
 
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.message || 'Failed to update profile');

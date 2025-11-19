@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Mail } from 'lucide-react';
 import { useLoginForm } from '@features/login';
-import { LoginHeader, InputField, ErrorMessage, NotificationMessage, OtpInput } from '@features/login';
+import {
+  LoginHeader,
+  InputField,
+  ErrorMessage,
+  NotificationMessage,
+  OtpInput,
+} from '@features/login';
 import './login.css';
 import { useMiniRouter } from '@context/router-context';
 import { signInWithOtp, verifyOtp as verifyOtpRequest } from '@services/auth-service';
@@ -85,7 +91,12 @@ export function Login() {
         {isOtpSent && (
           <>
             <p className="login-otp-helper">Enter the 6-digit code sent to your email.</p>
-            <OtpInput values={otpValues} onChange={handleOtpChange} disabled={isLoading} error={errors.otp} />
+            <OtpInput
+              values={otpValues}
+              onChange={handleOtpChange}
+              disabled={isLoading}
+              error={errors.otp}
+            />
           </>
         )}
 
@@ -93,7 +104,6 @@ export function Login() {
           {isLoading ? 'Please wait...' : isOtpSent ? 'Verify code' : 'Send code'}
         </button>
       </form>
-
     </div>
   );
 }

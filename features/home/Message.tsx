@@ -1,5 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User as UserIcon, Bot as BotIcon, Check, Edit2, Trash2, Plus, Save, X, MoreVertical } from 'lucide-react';
+import {
+  User as UserIcon,
+  Bot as BotIcon,
+  Check,
+  Edit2,
+  Trash2,
+  Plus,
+  Save,
+  X,
+  MoreVertical,
+} from 'lucide-react';
 import { Note, noteService } from '@services/note-service';
 import { Clock as ClockIcon } from 'lucide-react';
 import { getHeaderTitle, getEmptyState } from '@utils';
@@ -63,7 +73,10 @@ const NoteCard: React.FC<{
     if (isSaving) return;
     setIsSaving(true);
     try {
-      const updatedNote = await noteService.updateNote(note.id, { content: editedContent, date: note.dateAt });
+      const updatedNote = await noteService.updateNote(note.id, {
+        content: editedContent,
+        date: note.dateAt,
+      });
       onNoteUpdate(updatedNote);
       setIsEditing(false);
     } catch (error) {
@@ -97,227 +110,258 @@ const NoteCard: React.FC<{
         zIndex: isMenuOpen ? 20 : 'auto',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = styles.noteCardHover.backgroundColor || 'rgba(255, 255, 255, 0.95)';
-        e.currentTarget.style.borderColor = styles.noteCardHover.borderColor || 'rgba(99, 102, 241, 0.3)';
-        e.currentTarget.style.boxShadow = styles.noteCardHover.boxShadow || '0 8px 24px rgba(0, 0, 0, 0.12)';
+        e.currentTarget.style.backgroundColor =
+          styles.noteCardHover.backgroundColor || 'rgba(255, 255, 255, 0.95)';
+        e.currentTarget.style.borderColor =
+          styles.noteCardHover.borderColor || 'rgba(99, 102, 241, 0.3)';
+        e.currentTarget.style.boxShadow =
+          styles.noteCardHover.boxShadow || '0 8px 24px rgba(0, 0, 0, 0.12)';
         e.currentTarget.style.transform = styles.noteCardHover.transform || 'translateY(-2px)';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = styles.noteCard.backgroundColor || 'rgba(255, 255, 255, 0.9)';
-        e.currentTarget.style.borderColor = (styles.noteCard.border as string) || 'rgba(229, 231, 235, 0.6)';
-        e.currentTarget.style.boxShadow = styles.noteCard.boxShadow || '0 2px 12px rgba(0, 0, 0, 0.08)';
+        e.currentTarget.style.backgroundColor =
+          styles.noteCard.backgroundColor || 'rgba(255, 255, 255, 0.9)';
+        e.currentTarget.style.borderColor =
+          (styles.noteCard.border as string) || 'rgba(229, 231, 235, 0.6)';
+        e.currentTarget.style.boxShadow =
+          styles.noteCard.boxShadow || '0 2px 12px rgba(0, 0, 0, 0.08)';
         e.currentTarget.style.transform = 'translateY(0)';
       }}
     >
-            <div style={{...styles.noteContent, textDecoration: isCompleted ? 'line-through' : 'none'}}>
-              {isEditing ? (
-                <textarea
-                  value={editedContent}
-                  onChange={(e) => setEditedContent(e.target.value)}
+      <div style={{ ...styles.noteContent, textDecoration: isCompleted ? 'line-through' : 'none' }}>
+        {isEditing ? (
+          <textarea
+            value={editedContent}
+            onChange={(e) => setEditedContent(e.target.value)}
+            style={{
+              width: '100%',
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              padding: '8px',
+              fontSize: '13px',
+              lineHeight: '1.4',
+              fontFamily: 'inherit',
+              resize: 'vertical',
+              minHeight: '60px',
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+            autoFocus
+          />
+        ) : (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{note.content}</span>
+            {!isEditing && (
+              <div ref={menuRef} style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
                   style={{
-                    width: '100%',
-                    border: '1px solid #d1d5db',
+                    display: 'grid',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: 'transparent',
+                    color: '#6b7280',
+                    border: 'none',
                     borderRadius: '6px',
-                    padding: '8px',
-                    fontSize: '13px',
-                    lineHeight: '1.4',
-                    fontFamily: 'inherit',
-                    resize: 'vertical',
-                    minHeight: '60px',
-                    outline: 'none',
-                    boxSizing: 'border-box',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
                   }}
-                  autoFocus
-                />
-              ) : (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>{note.content}</span>
-                  {!isEditing && (
-                    <div ref={menuRef} style={{ position: 'relative' }}>
-                      <button
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        style={{
-                          display: 'grid',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          width: '28px',
-                          height: '28px',
-                          backgroundColor: 'transparent',
-                          color: '#6b7280',
-                          border: 'none',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-                        title="More options"
-                      >
-                        <MoreVertical size={16} />
-                      </button>
-                      {isMenuOpen && (
-                        <div style={{
-                          position: 'absolute',
-                          right: 0,
-                          top: '34px',
-                          backgroundColor: 'white',
-                          borderRadius: '8px',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                          zIndex: 50,
-                          width: '200px',
-                          padding: '4px',
-                          border: '1px solid #e5e7eb'
-                        }}>
-                          <button
-                            onClick={() => { handleComplete(); setIsMenuOpen(false); }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              width: '100%',
-                              padding: '8px 12px',
-                              backgroundColor: 'transparent',
-                              border: 'none',
-                              cursor: 'pointer',
-                              textAlign: 'left',
-                              fontSize: '13px',
-                              color: '#374151',
-                            }}
-                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-                          >
-                            <Check size={14} />
-                            {isCompleted ? 'Mark as Incomplete' : 'Mark as Complete'}
-                          </button>
-                          <button
-                            onClick={() => { handleEdit(); setIsMenuOpen(false); }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              width: '100%',
-                              padding: '8px 12px',
-                              backgroundColor: 'transparent',
-                              border: 'none',
-                              cursor: 'pointer',
-                              textAlign: 'left',
-                              fontSize: '13px',
-                              color: '#374151',
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = '#f3f4f6';
-                            }}
-                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-                          >
-                            <Edit2 size={14} />
-                            Edit Task
-                          </button>
-                          <button
-                            onClick={() => { handleDelete(); setIsMenuOpen(false); }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              width: '100%',
-                              padding: '8px 12px',
-                              backgroundColor: 'transparent',
-                              border: 'none',
-                              cursor: 'pointer',
-                              textAlign: 'left',
-                              fontSize: '13px',
-                              color: '#ef4444',
-                            }}
-                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-                          >
-                            <Trash2 size={14} />
-                            Delete Task
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                  title="More options"
+                >
+                  <MoreVertical size={16} />
+                </button>
+                {isMenuOpen && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: '34px',
+                      backgroundColor: 'white',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                      zIndex: 50,
+                      width: '200px',
+                      padding: '4px',
+                      border: '1px solid #e5e7eb',
+                    }}
+                  >
+                    <button
+                      onClick={() => {
+                        handleComplete();
+                        setIsMenuOpen(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        width: '100%',
+                        padding: '8px 12px',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontSize: '13px',
+                        color: '#374151',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f3f4f6';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
+                    >
+                      <Check size={14} />
+                      {isCompleted ? 'Mark as Incomplete' : 'Mark as Complete'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleEdit();
+                        setIsMenuOpen(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        width: '100%',
+                        padding: '8px 12px',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontSize: '13px',
+                        color: '#374151',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f3f4f6';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
+                    >
+                      <Edit2 size={14} />
+                      Edit Task
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleDelete();
+                        setIsMenuOpen(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        width: '100%',
+                        padding: '8px 12px',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontSize: '13px',
+                        color: '#ef4444',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f3f4f6';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
+                    >
+                      <Trash2 size={14} />
+                      Delete Task
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
       {isEditing && (
-        <div style={{
-          display: 'flex',
-          gap: '8px',
-          marginTop: '12px',
-          justifyContent: 'flex-end'
-        }}>
-            <button
-              onClick={handleCancel}
-              disabled={isSaving}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '6px 12px',
-                backgroundColor: '#6b7280',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '12px',
-                cursor: isSaving ? 'not-allowed' : 'pointer',
-                opacity: isSaving ? 0.7 : 1,
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                if (!isSaving) {
-                  e.currentTarget.style.backgroundColor = '#4b5563';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#6b7280';
-              }}
-            >
-              <X size={14} />
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '6px 12px',
-                backgroundColor: '#10b981',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '12px',
-                cursor: isSaving ? 'not-allowed' : 'pointer',
-                opacity: isSaving ? 0.7 : 1,
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                if (!isSaving) {
-                  e.currentTarget.style.backgroundColor = '#059669';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#10b981';
-              }}
-            >
-              <Save size={14} />
-              Save
-            </button>
+        <div
+          style={{
+            display: 'flex',
+            gap: '8px',
+            marginTop: '12px',
+            justifyContent: 'flex-end',
+          }}
+        >
+          <button
+            onClick={handleCancel}
+            disabled={isSaving}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '6px 12px',
+              backgroundColor: '#6b7280',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '12px',
+              cursor: isSaving ? 'not-allowed' : 'pointer',
+              opacity: isSaving ? 0.7 : 1,
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              if (!isSaving) {
+                e.currentTarget.style.backgroundColor = '#4b5563';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#6b7280';
+            }}
+          >
+            <X size={14} />
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '6px 12px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '12px',
+              cursor: isSaving ? 'not-allowed' : 'pointer',
+              opacity: isSaving ? 0.7 : 1,
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              if (!isSaving) {
+                e.currentTarget.style.backgroundColor = '#059669';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#10b981';
+            }}
+          >
+            <Save size={14} />
+            Save
+          </button>
         </div>
       )}
     </div>
   );
 };
 
-
-
 // Helper function to group notes by date
 const groupNotesByDate = (notes: Note[]): { [date: string]: Note[] } => {
   const grouped: { [date: string]: Note[] } = {};
 
-  notes.forEach(note => {
+  notes.forEach((note) => {
     const dateKey = new Date(note.dateAt).toDateString();
 
     if (!grouped[dateKey]) {
@@ -327,14 +371,14 @@ const groupNotesByDate = (notes: Note[]): { [date: string]: Note[] } => {
   });
 
   // Sort dates in descending order (newest first)
-  const sortedKeys = Object.keys(grouped).sort((a, b) =>
-    new Date(b).getTime() - new Date(a).getTime()
+  const sortedKeys = Object.keys(grouped).sort(
+    (a, b) => new Date(b).getTime() - new Date(a).getTime()
   );
 
   const sortedGrouped: { [date: string]: Note[] } = {};
-  sortedKeys.forEach(key => {
-    sortedGrouped[key] = grouped[key].sort((a, b) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  sortedKeys.forEach((key) => {
+    sortedGrouped[key] = grouped[key].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   });
 
@@ -357,7 +401,9 @@ const NotesDisplay: React.FC<{
 
   const handleNoteUpdate = (updatedNote: Note) => {
     setLocalNotes((prevNotes) => {
-      const updatedNotes = prevNotes.map((note) => (note.id === updatedNote.id ? { ...note, ...updatedNote } : note));
+      const updatedNotes = prevNotes.map((note) =>
+        note.id === updatedNote.id ? { ...note, ...updatedNote } : note
+      );
       onNotesChange?.(updatedNotes);
       return updatedNotes;
     });
@@ -391,21 +437,22 @@ const NotesDisplay: React.FC<{
 
   const addNewForm = (dateString: string) => {
     const formId = `form-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    setAddForms(prev => ({
+    setAddForms((prev) => ({
       ...prev,
-      [dateString]: [...(prev[dateString] || []), formId]
+      [dateString]: [...(prev[dateString] || []), formId],
     }));
   };
 
   const removeForm = (dateString: string, formId: string) => {
-    setAddForms(prev => ({
+    setAddForms((prev) => ({
       ...prev,
-      [dateString]: prev[dateString].filter(id => id !== formId)
+      [dateString]: prev[dateString].filter((id) => id !== formId),
     }));
   };
 
   if (!localNotes || localNotes.length === 0) {
-    if (intent === undefined) { // Welcome message case
+    if (intent === undefined) {
+      // Welcome message case
       return (
         <div style={styles.notesContainer}>
           {/* <AddNewNote styles={styles} onSave={(content, date) => handleAddNote(content, date)} /> */}
@@ -441,37 +488,45 @@ const NotesDisplay: React.FC<{
       {Object.entries(groupedNotes).map(([dateString, dateNotes]) => (
         <div key={dateString} style={{ marginBottom: '20px' }}>
           {/* Date Header */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: '12px',
-            padding: '8px 12px',
-            backgroundColor: 'rgba(99, 102, 241, 0.08)',
-            borderRadius: '8px',
-            border: '1px solid rgba(99, 102, 241, 0.15)',
-          }}>
-            <div style={{
-              fontSize: '13px',
-              fontWeight: '600',
-              color: '#4f46e5',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-            }}>
-              {formatDateDisplay(dateString)}
-            </div>
-            <div style={{
-              marginLeft: 'auto',
+          <div
+            style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-            }}>
-              <div style={{
-                fontSize: '12px',
-                color: '#6b7280',
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                padding: '2px 8px',
-                borderRadius: '12px',
-              }}>
+              marginBottom: '12px',
+              padding: '8px 12px',
+              backgroundColor: 'rgba(99, 102, 241, 0.08)',
+              borderRadius: '8px',
+              border: '1px solid rgba(99, 102, 241, 0.15)',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '13px',
+                fontWeight: '600',
+                color: '#4f46e5',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+              }}
+            >
+              {formatDateDisplay(dateString)}
+            </div>
+            <div
+              style={{
+                marginLeft: 'auto',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: '12px',
+                  color: '#6b7280',
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                }}
+              >
                 {dateNotes.length} {dateNotes.length === 1 ? 'task' : 'tasks'}
               </div>
               {/* Plus button beside task count */}
@@ -562,7 +617,7 @@ export const Message: React.FC<MessageProps> = ({ message, styles }) => {
       }}
     >
       {isAI && (
-        <div style={{...styles.avatar, ...styles.avatarAI}}>
+        <div style={{ ...styles.avatar, ...styles.avatarAI }}>
           <BotIcon size={18} color="white" />
         </div>
       )}
@@ -611,15 +666,20 @@ export const Message: React.FC<MessageProps> = ({ message, styles }) => {
             ))
           )}
         </div>
-        <div style={{
-          ...styles.messageTime,
-          ...(isAI ? styles.messageTimeAI : styles.messageTimeUser)
-        }}>
-          {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        <div
+          style={{
+            ...styles.messageTime,
+            ...(isAI ? styles.messageTimeAI : styles.messageTimeUser),
+          }}
+        >
+          {new Date(message.timestamp).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
         </div>
       </div>
       {!isAI && (
-        <div style={{...styles.avatar, ...styles.avatarUser}}>
+        <div style={{ ...styles.avatar, ...styles.avatarUser }}>
           <UserIcon size={18} color="white" />
         </div>
       )}

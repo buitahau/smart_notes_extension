@@ -53,10 +53,10 @@ export const verifyOtp = async (payload: LoginFormData): Promise<LoginResponse> 
     const token = data.session?.access_token;
     const userDetails = await fetchUserDetails(token);
     if (!userDetails) {
-      console.error("Can not fetch user detail of email " + payload.email)
-       return {
+      console.error('Can not fetch user detail of email ' + payload.email);
+      return {
         username: payload.email,
-        error: null
+        error: null,
       };
     }
     const username = await updateStorage(userDetails);
@@ -88,12 +88,11 @@ const fetchUserDetails = async (token: string | null): Promise<UserDetails | nul
   }
 };
 
-const updateStorage = async (
-  userDetails : UserDetails): Promise<string | null> => {
- 
-  const username = (userDetails.firstName || userDetails.lastName)
-  ? `${userDetails.firstName ?? ''} ${userDetails.lastName ?? ''}`.trim()
-  : userDetails.email;
+const updateStorage = async (userDetails: UserDetails): Promise<string | null> => {
+  const username =
+    userDetails.firstName || userDetails.lastName
+      ? `${userDetails.firstName ?? ''} ${userDetails.lastName ?? ''}`.trim()
+      : userDetails.email;
 
   await storage.set(STORAGE_KEYS.USER, userDetails);
   return username;

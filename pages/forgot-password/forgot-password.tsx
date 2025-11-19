@@ -33,7 +33,7 @@ export function ForgotPassword() {
     setNotification(null);
     setIsSubmitting(true);
 
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 800));
 
     setIsSubmitting(false);
     setNotification({
@@ -73,7 +73,7 @@ export function ForgotPassword() {
             autoComplete="email"
             icon={<Mail className="login-input-icon-svg" />}
             error={emailError}
-            onChange={event => setEmail(event.target.value)}
+            onChange={(event) => setEmail(event.target.value)}
           />
 
           <button type="submit" className="login-button" disabled={isSubmitting}>

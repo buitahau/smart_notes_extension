@@ -37,10 +37,10 @@ export const getHeaderTitle = (config: MessageTitleConfig): string => {
     if (content.includes('week') || content.includes('this week')) return "This Week's Tasks";
     if (content.includes('month') || content.includes('this month')) return "This Month's Tasks";
     if (content.includes('yesterday')) return "Yesterday's Tasks";
-    if (content.includes('weekend')) return "Weekend Tasks";
-    if (content.includes('upcoming') || content.includes('future')) return "Upcoming Tasks";
-    if (content.includes('overdue') || content.includes('pending')) return "Pending Tasks";
-    if (content.includes('complete') || content.includes('done')) return "Completed Tasks";
+    if (content.includes('weekend')) return 'Weekend Tasks';
+    if (content.includes('upcoming') || content.includes('future')) return 'Upcoming Tasks';
+    if (content.includes('overdue') || content.includes('pending')) return 'Pending Tasks';
+    if (content.includes('complete') || content.includes('done')) return 'Completed Tasks';
     return '';
   }
 
@@ -72,15 +72,23 @@ export const getEmptyState = (config: MessageTitleConfig): EmptyStateConfig => {
   const content = messageContent.toLowerCase();
 
   if (intent === 'task_list') {
-    if (content.includes('today')) return { icon: '📅', text: "No tasks scheduled for today." };
-    if (content.includes('tomorrow')) return { icon: '📅', text: "No tasks scheduled for tomorrow." };
-    if (content.includes('week') || content.includes('this week')) return { icon: '📆', text: "No tasks scheduled for this week." };
-    if (content.includes('month') || content.includes('this month')) return { icon: '📆', text: "No tasks scheduled for this month." };
-    if (content.includes('yesterday')) return { icon: '📅', text: "No tasks found from yesterday." };
-    if (content.includes('weekend')) return { icon: '🏖️', text: "No tasks scheduled for the weekend." };
-    if (content.includes('upcoming') || content.includes('future')) return { icon: '🔮', text: "No upcoming tasks found." };
-    if (content.includes('overdue') || content.includes('pending')) return { icon: '⏰', text: "No overdue or pending tasks found." };
-    if (content.includes('complete') || content.includes('done')) return { icon: '✅', text: "No completed tasks found." };
+    if (content.includes('today')) return { icon: '📅', text: 'No tasks scheduled for today.' };
+    if (content.includes('tomorrow'))
+      return { icon: '📅', text: 'No tasks scheduled for tomorrow.' };
+    if (content.includes('week') || content.includes('this week'))
+      return { icon: '📆', text: 'No tasks scheduled for this week.' };
+    if (content.includes('month') || content.includes('this month'))
+      return { icon: '📆', text: 'No tasks scheduled for this month.' };
+    if (content.includes('yesterday'))
+      return { icon: '📅', text: 'No tasks found from yesterday.' };
+    if (content.includes('weekend'))
+      return { icon: '🏖️', text: 'No tasks scheduled for the weekend.' };
+    if (content.includes('upcoming') || content.includes('future'))
+      return { icon: '🔮', text: 'No upcoming tasks found.' };
+    if (content.includes('overdue') || content.includes('pending'))
+      return { icon: '⏰', text: 'No overdue or pending tasks found.' };
+    if (content.includes('complete') || content.includes('done'))
+      return { icon: '✅', text: 'No completed tasks found.' };
     return { icon: '📋', text: 'No tasks found for this time period.' };
   }
 

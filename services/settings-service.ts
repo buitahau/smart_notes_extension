@@ -46,7 +46,6 @@ class SettingsService {
       intervalMinutes: Math.max(1, interval),
     };
   }
-
 }
 
 export const settingsService = new SettingsService();

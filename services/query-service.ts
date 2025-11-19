@@ -26,8 +26,8 @@ class QueryService {
             data: [],
             success: false,
             error: response.data?.message || 'Failed to execute query',
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         };
       }
 
@@ -41,8 +41,8 @@ class QueryService {
           data: Array.isArray(notesResponse?.data) ? notesResponse.data : [],
           success: notesResponse?.success ?? true,
           error: notesResponse?.error ?? null,
-          timestamp: notesResponse?.timestamp || new Date().toISOString()
-        }
+          timestamp: notesResponse?.timestamp || new Date().toISOString(),
+        },
       };
     } catch (error) {
       return {
@@ -52,8 +52,8 @@ class QueryService {
           data: [],
           success: false,
           error: 'Network error occurred',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       };
     }
   }

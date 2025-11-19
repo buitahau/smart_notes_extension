@@ -72,12 +72,14 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
           }}
           autoFocus
         />
-        <div style={{
-          display: 'flex',
-          gap: '8px',
-          marginTop: '12px',
-          justifyContent: 'flex-end'
-        }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '8px',
+            marginTop: '12px',
+            justifyContent: 'flex-end',
+          }}
+        >
           <button
             onClick={handleSave}
             style={{
@@ -108,11 +110,12 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
     );
   }
 
-  const isSelectedDateDifferent = selectedDate.toDateString() !== new Date(initialDate).toDateString();
+  const isSelectedDateDifferent =
+    selectedDate.toDateString() !== new Date(initialDate).toDateString();
 
   return (
     <div
-      className='add-note-container-selector'
+      className="add-note-container-selector"
       style={{
         ...styles.noteCard,
         border: '2px dashed #10b981',
@@ -123,16 +126,18 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
         position: 'relative',
       }}
     >
-      <div style={{
-        fontSize: '12px',
-        color: '#059669',
-        marginBottom: '8px',
-        fontWeight: '500',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '6px',
-        position: 'relative',
-      }}>
+      <div
+        style={{
+          fontSize: '12px',
+          color: '#059669',
+          marginBottom: '8px',
+          fontWeight: '500',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          position: 'relative',
+        }}
+      >
         <Plus size={14} />
         Adding task for{' '}
         <button
@@ -190,12 +195,14 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
         }}
         autoFocus
       />
-      <div style={{
-        display: 'flex',
-        gap: '8px',
-        marginTop: '12px',
-        justifyContent: 'flex-end'
-      }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: '8px',
+          marginTop: '12px',
+          justifyContent: 'flex-end',
+        }}
+      >
         <button
           onClick={onCancel}
           style={{

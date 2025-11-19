@@ -74,7 +74,10 @@ export const useLoginForm = () => {
         return false;
       }
 
-      await storage.set(STORAGE_KEYS.PENDING_OTP_LOGIN, { email: formData.email, timestamp: Date.now() });
+      await storage.set(STORAGE_KEYS.PENDING_OTP_LOGIN, {
+        email: formData.email,
+        timestamp: Date.now(),
+      });
       setIsOtpSent(true);
       return true;
     } catch (error) {

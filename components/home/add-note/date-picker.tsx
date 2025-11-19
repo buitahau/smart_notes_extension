@@ -6,7 +6,9 @@ export const DatePicker: React.FC<{
   onDateChange: (date: Date) => void;
   onClose: () => void;
 }> = ({ selectedDate, onDateChange, onClose }) => {
-  const [currentMonth, setCurrentMonth] = useState(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1));
+  const [currentMonth, setCurrentMonth] = useState(
+    new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1)
+  );
   const calendarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,9 +36,21 @@ export const DatePicker: React.FC<{
 
   const daysInMonth = getDaysInMonth(currentMonth);
   const firstDayOfMonth = getFirstDayOfMonth(currentMonth);
-  const monthNames = ["January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"];
-  const weekDays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+  const monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+  const weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
   const handleDateClick = (day: number) => {
     const newDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
@@ -57,20 +71,27 @@ export const DatePicker: React.FC<{
 
     // Empty cells for days before month starts
     for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push(<div key={`empty-${i}`} style={{
-        width: '26px',
-        height: '26px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}></div>);
+      days.push(
+        <div
+          key={`empty-${i}`}
+          style={{
+            width: '26px',
+            height: '26px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        ></div>
+      );
     }
 
     // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
-      const isToday = new Date().toDateString() ===
+      const isToday =
+        new Date().toDateString() ===
         new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day).toDateString();
-      const isSelected = selectedDate.toDateString() ===
+      const isSelected =
+        selectedDate.toDateString() ===
         new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day).toDateString();
 
       days.push(
@@ -133,13 +154,15 @@ export const DatePicker: React.FC<{
       }}
     >
       {/* Header with month/year and navigation */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '6px',
-        padding: '0 2px',
-      }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '6px',
+          padding: '0 2px',
+        }}
+      >
         <button
           onClick={handlePrevMonth}
           style={{
@@ -152,16 +175,18 @@ export const DatePicker: React.FC<{
             fontSize: '12px',
             fontWeight: 'bold',
           }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
         >
           ‹
         </button>
-        <div style={{
-          fontSize: '12px',
-          fontWeight: '600',
-          color: '#1f2937',
-        }}>
+        <div
+          style={{
+            fontSize: '12px',
+            fontWeight: '600',
+            color: '#1f2937',
+          }}
+        >
           {monthNames[currentMonth.getMonth()].slice(0, 3)} {currentMonth.getFullYear()}
         </div>
         <button
@@ -176,45 +201,52 @@ export const DatePicker: React.FC<{
             fontSize: '12px',
             fontWeight: 'bold',
           }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
         >
           ›
         </button>
       </div>
 
       {/* Week day headers */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(7, 1fr)',
-        gap: '1px',
-        marginBottom: '4px',
-      }}>
-        {weekDays.map(day => (
-          <div key={day} style={{
-            fontSize: '10px',
-            fontWeight: '600',
-            color: '#9ca3af',
-            textAlign: 'center',
-            textTransform: 'uppercase',
-            width: '26px',
-            height: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, 1fr)',
+          gap: '1px',
+          marginBottom: '4px',
+        }}
+      >
+        {weekDays.map((day) => (
+          <div
+            key={day}
+            style={{
+              fontSize: '10px',
+              fontWeight: '600',
+              color: '#9ca3af',
+              textAlign: 'center',
+              textTransform: 'uppercase',
+              width: '26px',
+              height: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
             {day}
           </div>
         ))}
       </div>
 
       {/* Calendar days */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(7, 1fr)',
-        gap: '1px',
-        justifyContent: 'center',
-      }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, 1fr)',
+          gap: '1px',
+          justifyContent: 'center',
+        }}
+      >
         {renderCalendarDays()}
       </div>
     </div>

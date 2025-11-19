@@ -62,11 +62,7 @@ export const Settings: React.FC = () => {
         const fallback = { ...defaults };
         setSettings(fallback);
         setIntervalInput(fallback.intervalMinutes.toString());
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'Unable to load settings. Using defaults.'
-        );
+        setError(err instanceof Error ? err.message : 'Unable to load settings. Using defaults.');
         await persistLocally(fallback);
       } finally {
         setIsLoading(false);

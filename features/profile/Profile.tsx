@@ -82,9 +82,7 @@ export const Profile: React.FC = () => {
         const storedDetails = (await storage.get(STORAGE_KEYS.USER)) as UserDetails | null;
         const fallbackProfile = deriveProfileFromUser(storedDetails);
         setFormData(fallbackProfile);
-        setErrorMessage(
-          err instanceof Error ? err.message : 'Unable to load profile information.'
-        );
+        setErrorMessage(err instanceof Error ? err.message : 'Unable to load profile information.');
       } finally {
         setIsLoading(false);
       }
