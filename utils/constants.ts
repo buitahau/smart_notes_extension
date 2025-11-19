@@ -21,6 +21,9 @@ export const API_ENDPOINTS = {
     VALIDATE: '/api/auth/validate',
     LOGOUT: '/api/auth/logout',
   },
+  USER: {
+    ME: '/api/users/me',
+  },
   NOTES: {
     BASE: '/api/notes',
     BY_ID: (id: string) => `/api/notes/${id}`,

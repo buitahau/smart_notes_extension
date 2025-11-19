@@ -50,7 +50,16 @@ export const verifyOtp = async (payload: LoginFormData): Promise<LoginResponse> 
       };
     }
 
-    const username = await updateStorage(data);
+    const token = data.session?.access_token;
+    const userDetails = await fetchUserDetails(token);
+    if (!userDetails) {
+      console.error("Can not fetch user detail of email " + payload.email)
+       return {
+        username: payload.email,
+        error: null
+      };
+    }
+    const username = await updateStorage(userDetails);
 
     return {
       username,
@@ -64,44 +73,29 @@ export const verifyOtp = async (payload: LoginFormData): Promise<LoginResponse> 
   }
 };
 
-const deriveNamesFromUsername = (fullName: string | null) => {
-  if (!fullName || !fullName.trim() || fullName.includes('@')) {
-    return { firstName: null, lastName: null };
-  }
+const fetchUserDetails = async (token: string | null): Promise<UserDetails | null> => {
+  try {
+    const response = await apiClient.get<UserDetails>(API_ENDPOINTS.USER.ME, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  const parts = fullName.trim().split(/\s+/);
-  if (parts.length === 1) {
-    return { firstName: parts[0], lastName: null };
+    return response.data;
+  } catch (error) {
+    console.warn('Failed to fetch user details:', error);
+    return null;
   }
-
-  return {
-    firstName: parts[0],
-    lastName: parts.slice(1).join(' '),
-  };
 };
 
-const updateStorage = async (data: any) => {
-  const username = data.user?.user_metadata?.username ?? data.user?.email ?? null;
-  const email = data.user?.email ?? null;
-  const token = data.session?.access_token ?? null;
-  const firstNameFromMeta = data.user?.user_metadata?.firstName ?? data.user?.user_metadata?.first_name ?? null;
-  const lastNameFromMeta = data.user?.user_metadata?.lastName ?? data.user?.user_metadata?.last_name ?? null;
-  const derivedNames = deriveNamesFromUsername(username);
+const updateStorage = async (
+  userDetails : UserDetails): Promise<string | null> => {
+ 
+  const username = (userDetails.firstName || userDetails.lastName)
+  ? `${userDetails.firstName ?? ''} ${userDetails.lastName ?? ''}`.trim()
+  : userDetails.email;
 
-  const userDetails: UserDetails = {
-    username,
-    email,
-    firstName: firstNameFromMeta ?? derivedNames.firstName,
-    lastName: lastNameFromMeta ?? derivedNames.lastName,
-  };
-
-  if (username || email) {
-    await storage.set(STORAGE_KEYS.USER, userDetails);
-  }
-  if (token) {
-    await storage.set(STORAGE_KEYS.TOKEN, token);
-  }
-
+  await storage.set(STORAGE_KEYS.USER, userDetails);
   return username;
 };
 

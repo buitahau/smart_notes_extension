@@ -25,10 +25,13 @@ export interface ValidateTokenResponse {
 }
 
 export interface UserDetails {
+  id?: string | null;
   username: string | null;
   email: string | null;
   firstName?: string | null;
   lastName?: string | null;
+  status?: string | null;
+  createdAt?: string | null;
 }
 
 export interface NotificationMessageProps {
