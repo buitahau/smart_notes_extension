@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ArrowLeft as ArrowLeftIcon, Mail as MailIcon, User as UserIcon } from 'lucide-react';
 import { useMiniRouter } from '@context/router-context';
 import { profileService } from '@services/profile-service';
-import type { UserProfile, UpdateProfilePayload } from '@types/profile';
+import type { UpdateProfilePayload } from '@types/profile';
 import { STORAGE_KEYS } from '@utils/constants';
 import { storage } from '@utils/storage';
 import type { UserDetails } from '@types/login';
@@ -10,60 +10,15 @@ import { profileStyles as styles } from './styles';
 
 type ProfileErrors = Partial<Record<keyof UpdateProfilePayload, string>>;
 
-const emptyProfile: UserProfile = {
+const defaultUserDetails: UserDetails = {
+  email: '',
   firstName: '',
   lastName: '',
-  email: '',
-};
-
-const splitFromUsername = (username?: string | null) => {
-  if (!username || !username.trim() || username.includes('@')) {
-    return { firstName: '', lastName: '' };
-  }
-
-  const parts = username.trim().split(/\s+/);
-  if (parts.length === 1) {
-    return { firstName: parts[0], lastName: '' };
-  }
-
-  return {
-    firstName: parts[0],
-    lastName: parts.slice(1).join(' '),
-  };
-};
-
-const deriveProfileFromUser = (details: UserDetails | null): UserProfile => {
-  if (!details) {
-    return { ...emptyProfile };
-  }
-
-  const fallback = splitFromUsername(details.username);
-
-  return {
-    firstName: details.firstName?.trim() || fallback.firstName,
-    lastName: details.lastName?.trim() || fallback.lastName,
-    email: details.email ?? '',
-  };
-};
-
-const persistProfileLocally = async (profile: UserProfile) => {
-  const trimmedFirst = profile.firstName.trim();
-  const trimmedLast = profile.lastName.trim();
-  const composedName = [trimmedFirst, trimmedLast].filter(Boolean).join(' ') || null;
-
-  const userDetails: UserDetails = {
-    username: composedName ?? profile.email ?? null,
-    email: profile.email ?? null,
-    firstName: trimmedFirst || null,
-    lastName: trimmedLast || null,
-  };
-
-  await storage.set(STORAGE_KEYS.USER, userDetails);
 };
 
 export const Profile: React.FC = () => {
   const { navigate } = useMiniRouter();
-  const [formData, setFormData] = useState<UserProfile>({ ...emptyProfile });
+  const [formData, setFormData] = useState<UserDetails>(defaultUserDetails);
   const [errors, setErrors] = useState<ProfileErrors>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -73,19 +28,12 @@ export const Profile: React.FC = () => {
   useEffect(() => {
     const loadProfile = async () => {
       setIsLoading(true);
-      try {
-        const profile = await profileService.getProfile();
-        setFormData(profile);
-        await persistProfileLocally(profile);
-        setErrorMessage(null);
-      } catch (err) {
-        const storedDetails = (await storage.get(STORAGE_KEYS.USER)) as UserDetails | null;
-        const fallbackProfile = deriveProfileFromUser(storedDetails);
-        setFormData(fallbackProfile);
-        setErrorMessage(err instanceof Error ? err.message : 'Unable to load profile information.');
-      } finally {
-        setIsLoading(false);
-      }
+
+      const storedDetails = (await storage.get(STORAGE_KEYS.USER)) as UserDetails | null;
+      setFormData(storedDetails ?? defaultUserDetails);
+
+      setErrorMessage(null);
+      setIsLoading(false);
     };
 
     loadProfile();
@@ -99,11 +47,11 @@ export const Profile: React.FC = () => {
   const validateForm = (): ProfileErrors => {
     const validationErrors: ProfileErrors = {};
 
-    if (!formData.firstName.trim()) {
+    if (!formData.firstName?.trim()) {
       validationErrors.firstName = 'First name is required';
     }
 
-    if (!formData.lastName.trim()) {
+    if (!formData.lastName?.trim()) {
       validationErrors.lastName = 'Last name is required';
     }
 
@@ -123,12 +71,12 @@ export const Profile: React.FC = () => {
     setErrorMessage(null);
     try {
       const payload: UpdateProfilePayload = {
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim(),
+        firstName: formData.firstName?.trim() ?? '',
+        lastName: formData.lastName?.trim() ?? '',
       };
       const updatedProfile = await profileService.updateProfile(payload);
       setFormData(updatedProfile);
-      await persistProfileLocally(updatedProfile);
+      await storage.set(STORAGE_KEYS.USER, updatedProfile);
       setStatusMessage('Profile updated');
       setTimeout(() => setStatusMessage(null), 2000);
     } catch (err) {
@@ -177,7 +125,7 @@ export const Profile: React.FC = () => {
                   id="firstName"
                   name="firstName"
                   type="text"
-                  value={formData.firstName}
+                  value={formData.firstName ?? ''}
                   placeholder="Enter first name"
                   onChange={(event) => handleChange('firstName', event.target.value)}
                   style={styles.input}
@@ -202,7 +150,7 @@ export const Profile: React.FC = () => {
                   id="lastName"
                   name="lastName"
                   type="text"
-                  value={formData.lastName}
+                  value={formData.lastName ?? ''}
                   placeholder="Enter last name"
                   onChange={(event) => handleChange('lastName', event.target.value)}
                   style={styles.input}
@@ -222,7 +170,7 @@ export const Profile: React.FC = () => {
                   id="email"
                   name="email"
                   type="email"
-                  value={formData.email}
+                  value={formData.email ?? ''}
                   style={{ ...styles.input, ...styles.inputReadOnly }}
                   disabled
                   autoComplete="email"

@@ -32,9 +32,6 @@ export const API_ENDPOINTS = {
     BASE: '/api/query',
   },
   SETTINGS: '/api/settings',
-  PROFILE: {
-    BASE: '/api/profile',
-  },
 } as const;
 
 /**
