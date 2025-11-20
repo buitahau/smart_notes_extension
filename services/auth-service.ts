@@ -11,6 +11,7 @@ import { handleApiError } from '@utils/error-handler';
 import { STORAGE_KEYS, API_ENDPOINTS } from '@utils/constants';
 import apiClient from './api-client';
 import { LogoutResponse } from '@types/login';
+import { UserDetailsResponse } from '@types/login/login';
 
 export const signInWithOtp = async (email: string): Promise<OtpRequestResponse> => {
   try {
@@ -51,7 +52,13 @@ export const verifyOtp = async (payload: LoginFormData): Promise<LoginResponse> 
     }
 
     const token = data.session?.access_token;
-    const userDetails = await fetchUserDetails(token);
+    if (token) {
+      await storage.set(STORAGE_KEYS.TOKEN, token);
+    } else {
+      console.warn('Login succeeded but token missing in response.');
+    }
+
+    const userDetails = token ? await fetchUserDetails(token) : null;
     if (!userDetails) {
       console.error('Can not fetch user detail of email ' + payload.email);
       return {
@@ -75,13 +82,18 @@ export const verifyOtp = async (payload: LoginFormData): Promise<LoginResponse> 
 
 const fetchUserDetails = async (token: string | null): Promise<UserDetails | null> => {
   try {
-    const response = await apiClient.get<UserDetails>(API_ENDPOINTS.USER.ME, {
+    const response = await apiClient.get<UserDetailsResponse>(API_ENDPOINTS.USER.ME, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
-    return response.data;
+    const userDetailsResponse = response.data;
+    if (!userDetailsResponse.success) {
+      console.warn('Failed to fetch user details:', userDetailsResponse.error);
+      return null;
+    }
+    return userDetailsResponse.user;
   } catch (error) {
     console.warn('Failed to fetch user details:', error);
     return null;

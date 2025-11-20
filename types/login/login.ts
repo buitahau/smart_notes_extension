@@ -24,6 +24,12 @@ export interface ValidateTokenResponse {
   error?: string;
 }
 
+export interface UserDetailsResponse {
+  success: boolean,
+  user: UserDetails | null,
+  error: string | null
+}
+
 export interface UserDetails {
   id?: string | null;
   email: string | null;
