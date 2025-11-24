@@ -1,3 +1,8 @@
 node_modules
 .wxt/*
 .output/*
+.wxt/
+.output/
+.env
+.env.local
+.env.*.local

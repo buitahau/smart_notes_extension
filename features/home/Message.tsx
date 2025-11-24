@@ -11,8 +11,7 @@ import {
   MoreVertical,
 } from 'lucide-react';
 import { Note, noteService } from '@services/note-service';
-import { Clock as ClockIcon } from 'lucide-react';
-import { getHeaderTitle, getEmptyState } from '@utils';
+import { getHeaderTitle } from '@utils';
 import { formatDateDisplay } from './date-utils';
 import { useChat } from '@context/chat-context';
 import { AddNewNote } from '@components/home/add-note/AddNewNote';

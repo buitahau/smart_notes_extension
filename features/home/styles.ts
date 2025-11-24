@@ -366,7 +366,7 @@ export const styles: { [key: string]: React.CSSProperties } = {
   },
   notesCount: {
     fontSize: '12px',
-    backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     color: 'white',
     padding: '4px 12px',
     borderRadius: '20px',

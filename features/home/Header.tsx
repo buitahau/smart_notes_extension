@@ -7,7 +7,6 @@ import {
   LogOut as LogOutIcon,
   Settings as SettingsIcon,
 } from 'lucide-react';
-import { useMiniRouter } from '@context/router-context';
 
 interface HeaderProps {
   userName: string;
@@ -32,7 +31,6 @@ export const Header: React.FC<HeaderProps> = ({
   userMenuRef,
   styles,
 }) => {
-  const { navigate } = useMiniRouter();
 
   return (
     <div style={styles.header}>

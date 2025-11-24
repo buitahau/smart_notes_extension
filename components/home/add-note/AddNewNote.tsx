@@ -110,8 +110,9 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
     );
   }
 
-  const isSelectedDateDifferent =
-    selectedDate.toDateString() !== new Date(initialDate).toDateString();
+  const isSelectedDateDifferent = initialDate ?
+    selectedDate.toDateString() !== new Date(initialDate).toDateString()
+    : false;
 
   return (
     <div
