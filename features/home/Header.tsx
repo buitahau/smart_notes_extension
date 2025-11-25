@@ -83,7 +83,8 @@ export const Header: React.FC<HeaderProps> = ({
               <UserCircleIcon size={16} />
               <span>Profile</span>
             </div>
-            <div
+            {/* TODO: Hide settings */}
+            {/* <div
               style={styles.menuItem}
               onClick={onSettings}
               onMouseEnter={(e) => {
@@ -98,7 +99,7 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <SettingsIcon size={16} />
               <span>Settings</span>
-            </div>
+            </div> */}
             <div
               style={styles.menuItem}
               onClick={onLogout}

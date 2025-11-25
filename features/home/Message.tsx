@@ -193,7 +193,8 @@ const NoteCard: React.FC<{
                       border: '1px solid #e5e7eb',
                     }}
                   >
-                    <button
+                    {/* TODO: Hide Mark as complete */}
+                    {/* <button
                       onClick={() => {
                         handleComplete();
                         setIsMenuOpen(false);
@@ -220,7 +221,7 @@ const NoteCard: React.FC<{
                     >
                       <Check size={14} />
                       {isCompleted ? 'Mark as Incomplete' : 'Mark as Complete'}
-                    </button>
+                    </button> */}
                     <button
                       onClick={() => {
                         handleEdit();
