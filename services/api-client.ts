@@ -2,7 +2,7 @@ import axios from 'axios';
 import { storage } from '@utils/storage';
 import { STORAGE_KEYS, API_ENDPOINTS } from '@utils/constants';
 
-const BACKEND_URL = import.meta.env.BACKEND_URL || 'http://localhost:3000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const PROTECTED_APIS = [
   API_ENDPOINTS.AUTH.VALIDATE,

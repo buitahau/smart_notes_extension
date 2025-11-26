@@ -43,8 +43,9 @@ export const APP_CONSTANTS = {
 } as const;
 
 export const DEFAULT_SETTINGS = {
+  ENABLED_FEATURE: false,
   NOTIFICATION: {
-    receiveReminder: true,
+    receiveReminder: false,
     intervalMinutes: 60,
   },
 } as const;

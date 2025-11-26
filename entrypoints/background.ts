@@ -18,6 +18,21 @@ type StoredMessage = {
   intent?: string;
 };
 
+type BrowserApi = typeof chrome;
+
+export function getBrowserApi(): BrowserApi {
+  if (typeof chrome !== 'undefined') {
+    return chrome;
+  }
+
+  const maybeBrowser = (globalThis as typeof globalThis & { browser?: BrowserApi }).browser;
+  if (maybeBrowser) {
+    return maybeBrowser;
+  }
+
+  throw new Error('Browser APIs are unavailable in this environment');
+}
+
 const NOTIFICATION_ALARM_NAME = 'smart_note_task_notification';
 
 const getStoredNotificationSettings = async (): Promise<AppSettings> => {
@@ -31,20 +46,23 @@ const getStoredNotificationSettings = async (): Promise<AppSettings> => {
 };
 
 const syncReminderAlarm = async () => {
-  if (!chrome?.alarms) return;
+  if (!DEFAULT_SETTINGS.ENABLED_FEATURE) {
+    return;
+  }
+  if (!getBrowserApi()?.alarms) return;
 
   const settings = await getStoredNotificationSettings();
 
   if (!settings.receiveReminder) {
-    chrome.alarms.clear(NOTIFICATION_ALARM_NAME);
+    getBrowserApi().alarms.clear(NOTIFICATION_ALARM_NAME);
     return;
   }
 
   const desiredInterval = Math.max(1, settings.intervalMinutes);
 
-  chrome.alarms.get(NOTIFICATION_ALARM_NAME, (existingAlarm) => {
+  getBrowserApi().alarms.get(NOTIFICATION_ALARM_NAME, (existingAlarm) => {
     if (!existingAlarm || existingAlarm.periodInMinutes !== desiredInterval) {
-      chrome.alarms.create(NOTIFICATION_ALARM_NAME, {
+      getBrowserApi().alarms.create(NOTIFICATION_ALARM_NAME, {
         periodInMinutes: desiredInterval,
       });
     }
@@ -83,9 +101,9 @@ const showTaskReminderNotification = async () => {
     const note = pickRandomNote(storedMessages);
     if (!note) return;
 
-    chrome.notifications.create(`smart-note-${Date.now()}`, {
+    getBrowserApi().notifications.create(`smart-note-${Date.now()}`, {
       type: 'basic',
-      iconUrl: chrome.runtime.getURL('icon/128.png'),
+      iconUrl: getBrowserApi().runtime.getURL('icon/128.png'),
       title: 'Task reminder',
       message: truncateContent(note.content),
       contextMessage: note.dateAt ? new Date(note.dateAt).toLocaleDateString() : undefined,
@@ -99,7 +117,7 @@ const showTaskReminderNotification = async () => {
 export default defineBackground(() => {
   console.log('Background script loaded');
 
-  chrome.runtime.onInstalled.addListener((details) => {
+  getBrowserApi().runtime.onInstalled.addListener((details) => {
     if (details.reason === 'install') {
       console.log('Extension installed');
     } else if (details.reason === 'update') {
@@ -108,12 +126,12 @@ export default defineBackground(() => {
     void syncReminderAlarm();
   });
 
-  chrome.runtime.onStartup?.addListener(() => {
+  getBrowserApi().runtime.onStartup?.addListener(() => {
     void syncReminderAlarm();
   });
   void syncReminderAlarm();
 
-  chrome.storage.onChanged.addListener((changes, areaName) => {
+  getBrowserApi().storage.onChanged.addListener((changes, areaName) => {
     if (areaName !== 'local') {
       return;
     }
@@ -123,13 +141,13 @@ export default defineBackground(() => {
     }
   });
 
-  chrome.alarms.onAlarm.addListener((alarm) => {
+  getBrowserApi().alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === NOTIFICATION_ALARM_NAME) {
       showTaskReminderNotification();
     }
   });
 
-  chrome.runtime.onMessage.addListener((message: unknown, _sender, _sendResponse) => {
+  getBrowserApi().runtime.onMessage.addListener((message: unknown, _sender, _sendResponse) => {
     const msg = message as BackgroundMessage;
     console.log('Message received in background script:', msg);
 

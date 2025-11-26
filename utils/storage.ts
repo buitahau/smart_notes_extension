@@ -1,22 +1,40 @@
 import { STORAGE_KEYS } from './constants';
 
+type BrowserApi = typeof chrome;
+type BrowserGlobal = typeof globalThis & { browser?: BrowserApi };
+
+const getStorageArea = () => {
+  if (typeof chrome !== 'undefined') {
+    return chrome.storage.local;
+  }
+
+  const maybeBrowser = (globalThis as BrowserGlobal).browser;
+  console.log("maybeBrowser")
+  console.log(maybeBrowser)
+  if (maybeBrowser?.storage?.local) {
+    return maybeBrowser.storage.local;
+  }
+
+  throw new Error('Browser storage API is unavailable in this environment');
+};
+
 export type StorageKeys = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
 
 export const storage = {
   async set<T>(key: StorageKeys, value: T): Promise<void> {
-    await chrome.storage.local.set({ [key]: value });
+    await getStorageArea().set({ [key]: value });
   },
 
   async get<T>(key: StorageKeys): Promise<T | null> {
-    const result = await chrome.storage.local.get(key);
+    const result = await getStorageArea().get(key);
     return result[key] ?? null;
   },
 
   async remove(key: StorageKeys): Promise<void> {
-    await chrome.storage.local.remove(key);
+    await getStorageArea().remove(key);
   },
 
   async clear(): Promise<void> {
-    await chrome.storage.local.clear();
+    await getStorageArea().clear();
   },
 };
