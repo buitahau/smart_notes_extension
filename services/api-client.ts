@@ -31,6 +31,7 @@ apiClient.interceptors.request.use(
 
     if (isProtectedRoute) {
       try {
+        console.log("apiClient.interceptors.request")
         const token = await storage.get(STORAGE_KEYS.TOKEN);
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;

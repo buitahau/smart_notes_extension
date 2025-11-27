@@ -141,11 +141,13 @@ export default defineBackground(() => {
     }
   });
 
-  getBrowserApi().alarms.onAlarm.addListener((alarm) => {
-    if (alarm.name === NOTIFICATION_ALARM_NAME) {
-      showTaskReminderNotification();
-    }
-  });
+  if (DEFAULT_SETTINGS.ENABLED_FEATURE) {
+      getBrowserApi().alarms.onAlarm.addListener((alarm) => {
+        if (alarm.name === NOTIFICATION_ALARM_NAME) {
+          showTaskReminderNotification();
+        }
+      });
+  }
 
   getBrowserApi().runtime.onMessage.addListener((message: unknown, _sender, _sendResponse) => {
     const msg = message as BackgroundMessage;

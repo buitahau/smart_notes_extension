@@ -27,6 +27,9 @@ export const storage = {
 
   async get<T>(key: StorageKeys): Promise<T | null> {
     const result = await getStorageArea().get(key);
+    if (result == undefined) {
+      return null;
+    }
     return result[key] ?? null;
   },
 

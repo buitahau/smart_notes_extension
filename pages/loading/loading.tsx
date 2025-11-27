@@ -15,6 +15,7 @@ export function Loading({ message = 'Smart Notes is loading...', size = 'large' 
 
   useEffect(() => {
     const checkToken = async () => {
+      console.log("Loading")
       const token = await storage.get(STORAGE_KEYS.TOKEN);
 
       if (token) {

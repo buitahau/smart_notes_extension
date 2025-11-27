@@ -10,7 +10,10 @@ export function RequiredAuth({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function validateToken() {
+      console.log("RequiredAuth validateToken")
+      console.log(storage);
       const token = await storage.get(STORAGE_KEYS.TOKEN);
+      console.log("token: " + token)
       if (!token) {
         navigate('login');
         return;

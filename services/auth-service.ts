@@ -53,6 +53,7 @@ export const verifyOtp = async (payload: LoginFormData): Promise<LoginResponse> 
 
     const token = data.session?.access_token;
     if (token) {
+      console.log("verifyOtp")
       await storage.set(STORAGE_KEYS.TOKEN, token);
     } else {
       console.warn('Login succeeded but token missing in response.');
