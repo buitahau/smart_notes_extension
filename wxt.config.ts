@@ -54,8 +54,8 @@ export default defineConfig({
   }),
   manifest: {
     name: 'Smart Notes',
-    description: 'Smart Notes Chrome Extension',
+    description: 'Smart Notes Extension',
     version: '1.0.0',
-    permissions: ['storage', 'notifications', 'alarms'],
+    permissions: ['storage'],
   },
 });

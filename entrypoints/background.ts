@@ -1,3 +1,4 @@
+import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/sandbox';
 import { DEFAULT_SETTINGS, STORAGE_KEYS } from '@utils/constants';
 import { storage } from '@utils/storage';
@@ -31,24 +32,23 @@ const getStoredNotificationSettings = async (): Promise<AppSettings> => {
 };
 
 const syncReminderAlarm = async () => {
-  if (!chrome?.alarms) return;
+  if (!browser?.alarms) return;
 
   const settings = await getStoredNotificationSettings();
 
   if (!settings.receiveReminder) {
-    chrome.alarms.clear(NOTIFICATION_ALARM_NAME);
+    await browser.alarms.clear(NOTIFICATION_ALARM_NAME);
     return;
   }
 
   const desiredInterval = Math.max(1, settings.intervalMinutes);
 
-  chrome.alarms.get(NOTIFICATION_ALARM_NAME, (existingAlarm) => {
-    if (!existingAlarm || existingAlarm.periodInMinutes !== desiredInterval) {
-      chrome.alarms.create(NOTIFICATION_ALARM_NAME, {
-        periodInMinutes: desiredInterval,
-      });
-    }
-  });
+  const existingAlarm = await browser.alarms.get(NOTIFICATION_ALARM_NAME);
+  if (!existingAlarm || existingAlarm.periodInMinutes !== desiredInterval) {
+    browser.alarms.create(NOTIFICATION_ALARM_NAME, {
+      periodInMinutes: desiredInterval,
+    });
+  }
 };
 
 const pickRandomNote = (messages: StoredMessage[]): Note | null => {
@@ -83,9 +83,9 @@ const showTaskReminderNotification = async () => {
     const note = pickRandomNote(storedMessages);
     if (!note) return;
 
-    chrome.notifications.create(`smart-note-${Date.now()}`, {
+    await browser.notifications.create(`smart-note-${Date.now()}`, {
       type: 'basic',
-      iconUrl: chrome.runtime.getURL('icon/128.png'),
+      iconUrl: browser.runtime.getURL('icon/128.png'),
       title: 'Task reminder',
       message: truncateContent(note.content),
       contextMessage: note.dateAt ? new Date(note.dateAt).toLocaleDateString() : undefined,
@@ -99,7 +99,7 @@ const showTaskReminderNotification = async () => {
 export default defineBackground(() => {
   console.log('Background script loaded');
 
-  chrome.runtime.onInstalled.addListener((details) => {
+  browser.runtime.onInstalled.addListener((details) => {
     if (details.reason === 'install') {
       console.log('Extension installed');
     } else if (details.reason === 'update') {
@@ -108,12 +108,12 @@ export default defineBackground(() => {
     void syncReminderAlarm();
   });
 
-  chrome.runtime.onStartup?.addListener(() => {
+  browser.runtime.onStartup?.addListener(() => {
     void syncReminderAlarm();
   });
   void syncReminderAlarm();
 
-  chrome.storage.onChanged.addListener((changes, areaName) => {
+  browser.storage.onChanged.addListener((changes, areaName) => {
     if (areaName !== 'local') {
       return;
     }
@@ -123,13 +123,15 @@ export default defineBackground(() => {
     }
   });
 
-  chrome.alarms.onAlarm.addListener((alarm) => {
-    if (alarm.name === NOTIFICATION_ALARM_NAME) {
-      showTaskReminderNotification();
-    }
-  });
+  if (browser?.alarms) {
+    browser.alarms.onAlarm.addListener((alarm) => {
+      if (alarm.name === NOTIFICATION_ALARM_NAME) {
+        showTaskReminderNotification();
+      }
+    });
+  }
 
-  chrome.runtime.onMessage.addListener((message: unknown, _sender, _sendResponse) => {
+  browser.runtime.onMessage.addListener((message: unknown, _sender, _sendResponse) => {
     const msg = message as BackgroundMessage;
     console.log('Message received in background script:', msg);
 
