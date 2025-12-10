@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Note } from '@services/note-service';
+import type { AsyncQueryStatus } from '@services/async-query-service';
 
 export interface Message {
   id: string;
@@ -8,11 +9,13 @@ export interface Message {
   timestamp: string;
   notes?: Note[];
   intent?: string;
+  queryId?: string;
+  queryStatus?: AsyncQueryStatus;
 }
 
 interface ChatContextType {
   messages: Message[];
-  setMessages: (messages: Message[]) => void;
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   addMessage: (message: Message) => void;
   clearMessages: () => void;
 }
