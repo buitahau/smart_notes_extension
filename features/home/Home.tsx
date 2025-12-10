@@ -1,16 +1,28 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { storage } from '@utils/storage';
 import { logout } from '@services/auth-service';
 import { useMiniRouter } from '@context/router-context';
 import { useChat } from '@context/chat-context';
 import { STORAGE_KEYS } from '@utils/constants';
 import { UserDetails } from '@types/login';
-import { queryService } from '@services/query-service';
+import { asyncQueryService } from '@services/async-query-service';
+import type { QueryResponse } from '@services/query-service';
 import { Message } from '@context/chat-context';
 import { Header } from './Header';
 import { Message as MessageComponent } from './Message';
 import { Input } from './Input';
 import { styles } from './styles';
+
+const MAX_POLL_ATTEMPTS = 15;
+const POLL_INTERVAL_MS = 2000;
+const THINKING_MESSAGE = 'Thinking';
+const CANCELLED_ERROR_MESSAGE = 'Sorry, your request was cancelled. Please try again.';
+const GENERIC_ERROR_MESSAGE =
+  'Sorry, I encountered an error while processing your request. Please try again.';
+
+interface PollOptions {
+  showErrorOnCancel?: boolean;
+}
 
 export const Home: React.FC = () => {
   const [inputText, setInputText] = useState('');
@@ -19,13 +31,229 @@ export const Home: React.FC = () => {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { navigate } = useMiniRouter();
   const { messages, setMessages } = useChat();
+  const isMountedRef = useRef(true);
+  const pollingQueriesRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      pollingQueriesRef.current.clear();
+    };
+  }, []);
+
+  const handleQuerySuccess = useCallback(
+    (queryId: string, response: QueryResponse | null) => {
+      if (!isMountedRef.current) {
+        return;
+      }
+
+      setMessages((prev) =>
+        prev.map((msg) => {
+          if (msg.queryId !== queryId) {
+            return msg;
+          }
+
+          const notesData = response?.notes;
+          const notesArray = Array.isArray(notesData?.data) ? notesData.data : [];
+
+          let content = 'No notes found.';
+          if (
+            (notesData?.intent === 'task_list' || notesData?.intent === 'date_lookup') &&
+            notesArray.length > 0
+          ) {
+            content = 'Here are your tasks:';
+          } else if (notesArray.length > 0) {
+            content = 'Here are your notes:';
+          }
+
+          return {
+            ...msg,
+            queryStatus: 'completed',
+            content,
+            notes: notesArray,
+            intent: notesData?.intent,
+            timestamp: new Date().toISOString(),
+          };
+        })
+      );
+    },
+    [setMessages]
+  );
+
+  const handleCancelled = useCallback(
+    (queryId: string, showError = false) => {
+      if (!isMountedRef.current) {
+        return;
+      }
+
+      setMessages((prev) => {
+        const filtered = prev.filter((msg) => msg.queryId !== queryId);
+        if (!showError) {
+          return filtered;
+        }
+
+        const now = Date.now();
+        const timestamp = new Date(now).toISOString();
+
+        return [
+          ...filtered,
+          {
+            id: `error-${now}`,
+            type: 'ai',
+            content: CANCELLED_ERROR_MESSAGE,
+            timestamp,
+          },
+        ];
+      });
+    },
+    [setMessages]
+  );
+
+  const pollAsyncQuery = useCallback(
+    (queryId: string, attempt = 0, options?: PollOptions) => {
+      if (!queryId || !isMountedRef.current) {
+        return;
+      }
+
+      const shouldShowError = options?.showErrorOnCancel ?? false;
+
+      if (attempt === 0) {
+        if (pollingQueriesRef.current.has(queryId)) {
+          return;
+        }
+        pollingQueriesRef.current.add(queryId);
+      }
+
+      const checkStatus = async () => {
+        if (!isMountedRef.current) {
+          pollingQueriesRef.current.delete(queryId);
+          return;
+        }
+
+        if (attempt >= MAX_POLL_ATTEMPTS) {
+          pollingQueriesRef.current.delete(queryId);
+          handleCancelled(queryId, shouldShowError);
+          return;
+        }
+
+        try {
+          const result = await asyncQueryService.get(queryId);
+
+          if (!isMountedRef.current) {
+            pollingQueriesRef.current.delete(queryId);
+            return;
+          }
+
+          if (!result) {
+            pollingQueriesRef.current.delete(queryId);
+            handleCancelled(queryId, shouldShowError);
+            return;
+          }
+
+          if (result.status === 'completed') {
+            handleQuerySuccess(queryId, result.response);
+            pollingQueriesRef.current.delete(queryId);
+            return;
+          }
+
+          if (result.status === 'cancelled') {
+            handleCancelled(queryId, shouldShowError);
+            pollingQueriesRef.current.delete(queryId);
+            return;
+          }
+
+          window.setTimeout(() => {
+            pollAsyncQuery(queryId, attempt + 1, options);
+          }, POLL_INTERVAL_MS);
+        } catch (error) {
+          console.error('Failed to poll async query', error);
+          pollingQueriesRef.current.delete(queryId);
+          handleCancelled(queryId, shouldShowError);
+        }
+      };
+
+      void checkStatus();
+    },
+    [handleCancelled, handleQuerySuccess]
+  );
+
+  const handleExistingAsyncMessage = useCallback(
+    async (message: Message) => {
+      if (!message.queryId) {
+        return;
+      }
+
+      if (message.queryStatus === 'completed') {
+        return;
+      }
+
+      if (message.queryStatus === 'cancelled') {
+        handleCancelled(message.queryId);
+        return;
+      }
+
+      try {
+        const result = await asyncQueryService.get(message.queryId);
+
+        if (!isMountedRef.current) {
+          return;
+        }
+
+        if (!result) {
+          handleCancelled(message.queryId);
+          return;
+        }
+
+        if (result.status === 'completed') {
+          handleQuerySuccess(message.queryId, result.response);
+          return;
+        }
+
+        if (result.status === 'cancelled') {
+          handleCancelled(message.queryId);
+          return;
+        }
+
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === message.id
+              ? {
+                  ...msg,
+                  queryStatus: result.status,
+                  content: THINKING_MESSAGE,
+                }
+              : msg
+          )
+        );
+
+        pollAsyncQuery(message.queryId, 0, { showErrorOnCancel: false });
+      } catch (error) {
+        console.error('Failed to resume async query', error);
+        handleCancelled(message.queryId);
+      }
+    },
+    [handleCancelled, handleQuerySuccess, pollAsyncQuery, setMessages]
+  );
 
   // Load messages from storage on initial render
   useEffect(() => {
+    let isActive = true;
+
     const loadMessages = async () => {
       const savedMessages = await storage.get<Message[]>(STORAGE_KEYS.CHAT_MESSAGES);
+
+      if (!isActive || !isMountedRef.current) {
+        return;
+      }
+
       if (savedMessages && savedMessages.length > 0) {
         setMessages(savedMessages);
+
+        savedMessages.forEach((message) => {
+          if (message.queryId && message.queryStatus !== 'completed') {
+            void handleExistingAsyncMessage(message);
+          }
+        });
       } else {
         // Initialize welcome message if no messages exist
         setMessages([
@@ -39,15 +267,18 @@ export const Home: React.FC = () => {
         ]);
       }
     };
+
     loadMessages();
-  }, [setMessages]);
+
+    return () => {
+      isActive = false;
+    };
+  }, [handleExistingAsyncMessage, setMessages]);
 
   // Save messages to storage when they change
   useEffect(() => {
-    if (messages.length > 0) {
-      const lastFiveMessages = messages.slice(-5);
-      storage.set(STORAGE_KEYS.CHAT_MESSAGES, lastFiveMessages);
-    }
+    const messagesToPersist = messages.length > 0 ? messages.slice(-5) : [];
+    storage.set(STORAGE_KEYS.CHAT_MESSAGES, messagesToPersist);
   }, [messages]);
 
   const handleCreateNote = () => {
@@ -58,6 +289,7 @@ export const Home: React.FC = () => {
     if (!inputText.trim()) return;
 
     const userInput = inputText.trim();
+    const normalizedQuery = userInput.toLowerCase();
 
     // Add user message to chat
     const userMessage: Message = {
@@ -72,63 +304,48 @@ export const Home: React.FC = () => {
     const loadingMessage: Message = {
       id: loadingMessageId,
       type: 'ai',
-      content: 'Thinking',
+      content: THINKING_MESSAGE,
       timestamp: new Date().toISOString(),
+      queryStatus: 'pending',
     };
-    const updatedMessages = [...messages, userMessage, loadingMessage];
-    setMessages(updatedMessages);
+    setMessages((prev) => [...prev, userMessage, loadingMessage]);
 
     setInputText('');
 
-    // Call query service
     try {
-      const response = await queryService.sendQuery(userInput.toLowerCase());
-      const notesData = response.notes;
+      const asyncQueryId = await asyncQueryService.create(normalizedQuery);
 
-      // Remove loading message and add AI response
-      const filteredMessages = updatedMessages.filter(
-        (msg: Message) => msg.id !== loadingMessageId
-      );
-      let aiResponse: Message;
-
-      // Ensure notesData.data is always an array
-      const notesArray = Array.isArray(notesData.data) ? notesData.data : [];
-
-      if (
-        (notesData.intent === 'task_list' || notesData.intent === 'date_lookup') &&
-        notesArray.length > 0
-      ) {
-        aiResponse = {
-          id: `ai-${Date.now()}`,
-          type: 'ai',
-          content: 'Here are your tasks:',
-          timestamp: new Date().toISOString(),
-          notes: notesArray,
-          intent: notesData.intent,
-        };
-      } else {
-        aiResponse = {
-          id: `ai-${Date.now()}`,
-          type: 'ai',
-          content: notesArray.length > 0 ? 'Here are your notes:' : 'No notes found.',
-          timestamp: new Date().toISOString(),
-          notes: notesArray,
-          intent: notesData.intent,
-        };
+      if (!isMountedRef.current) {
+        return;
       }
-      setMessages([...filteredMessages, aiResponse]);
-    } catch (error) {
-      // Remove loading message and add error response
-      const filteredMessages = updatedMessages.filter(
-        (msg: Message) => msg.id !== loadingMessageId
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === loadingMessageId
+            ? { ...msg, queryId: asyncQueryId, queryStatus: 'in-progress' }
+            : msg
+        )
       );
-      const errorResponse: Message = {
-        id: `error-${Date.now()}`,
-        type: 'ai',
-        content: 'Sorry, I encountered an error while processing your request. Please try again.',
-        timestamp: new Date().toISOString(),
-      };
-      setMessages([...filteredMessages, errorResponse]);
+
+      pollAsyncQuery(asyncQueryId, 0, { showErrorOnCancel: true });
+    } catch (error) {
+      console.error('Failed to create async query', error);
+      if (!isMountedRef.current) {
+        return;
+      }
+
+      setMessages((prev) => {
+        const filtered = prev.filter((msg) => msg.id !== loadingMessageId);
+        const now = Date.now();
+        const timestamp = new Date(now).toISOString();
+        const errorResponse: Message = {
+          id: `error-${now}`,
+          type: 'ai',
+          content: GENERIC_ERROR_MESSAGE,
+          timestamp,
+        };
+        return [...filtered, errorResponse];
+      });
     }
   };
 
