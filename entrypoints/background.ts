@@ -2,13 +2,23 @@ import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/sandbox';
 import { DEFAULT_SETTINGS, STORAGE_KEYS } from '@utils/constants';
 import { storage } from '@utils/storage';
+import { asyncQueryService } from '@services/async-query-service';
+import type { AsyncQuery } from '@services/async-query-service';
 import type { Note } from '@services/note-service';
 import type { AppSettings } from '@types/settings';
 
-type BackgroundMessage = {
-  type: string;
-  payload?: unknown;
-};
+type BackgroundMessage =
+  | {
+      type: 'example';
+      payload?: unknown;
+    }
+  | {
+      type: 'show-task-reminder';
+    }
+  | {
+      type: 'process-async-query';
+      payload: AsyncQuery;
+    };
 
 type StoredMessage = {
   id: string;
@@ -141,6 +151,11 @@ export default defineBackground(() => {
         break;
       case 'show-task-reminder':
         showTaskReminderNotification();
+        break;
+      case 'process-async-query':
+        asyncQueryService.processQuery(msg.payload).catch((error) => {
+          console.error('Failed to process async query in background', error);
+        });
         break;
       default:
         console.warn('Unknown message type:', msg?.type);

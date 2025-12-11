@@ -25,6 +25,7 @@ interface MessageProps {
     timestamp: string;
     notes?: Note[];
     intent?: string;
+    queryStatus?: string;
   };
   styles: { [key: string]: React.CSSProperties };
 }
@@ -602,7 +603,7 @@ const NotesDisplay: React.FC<{
 export const Message: React.FC<MessageProps> = ({ message, styles }) => {
   const { messages: chatMessages, setMessages } = useChat();
   const isAI = message.type === 'ai';
-  const isLoading = message.id.startsWith('loading-');
+  const isLoading = message.queryStatus === 'in-progress' || message.id.startsWith('loading-');
   const handleNotesChange = (updatedNotes: Note[]) => {
     const nextMessages = chatMessages.map((msg) =>
       msg.id === message.id ? { ...msg, notes: updatedNotes } : msg

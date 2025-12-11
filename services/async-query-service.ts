@@ -36,15 +36,24 @@ class AsyncQueryService<T = QueryResponse> {
 
     await browser.storage.local.set({ [this.getStorageKey(id)]: queryObj });
 
-    // Fire and forget background query execution.
-    this.processQuery(queryObj).catch((error) => {
-      console.error('Failed to process async query', error);
-    });
+    this.delegateProcessing(queryObj);
 
     return id;
   }
 
-  private async processQuery(queryObj: AsyncQuery<T>): Promise<void> {
+  private delegateProcessing(queryObj: AsyncQuery<T>) {
+    void browser.runtime
+      .sendMessage({
+        type: 'process-async-query',
+        payload: queryObj,
+      })
+      .catch((error) => {
+        console.log('Failed to delegate async query to background script', error);
+        // handle error
+      });
+  }
+
+  async processQuery(queryObj: AsyncQuery<T>): Promise<void> {
     try {
       const response = (await queryService.sendQuery(queryObj.query)) as T;
       const updatedQuery: AsyncQuery<T> = {
@@ -52,7 +61,7 @@ class AsyncQueryService<T = QueryResponse> {
         status: 'completed',
         response,
       };
-
+      console.log("completed query " + queryObj.id)
       await browser.storage.local.set({
         [this.getStorageKey(queryObj.id)]: updatedQuery,
       });
