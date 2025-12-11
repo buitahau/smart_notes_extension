@@ -14,6 +14,8 @@ import { asyncQueryService } from '@services/async-query-service';
 
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLL_ATTEMPTS = 15;
+const GENERIC_ERROR_MESSAGE =
+  'Sorry, I encountered an error while processing your request. Please try again.'
 
 export const Home: React.FC = () => {
   const [inputText, setInputText] = useState('');
@@ -30,7 +32,7 @@ export const Home: React.FC = () => {
       if (savedMessages && savedMessages.length > 0) {
         setMessages(savedMessages);
         savedMessages.forEach((msg) => {
-          if (msg.queryId && msg.queryStatus !== 'completed') {
+          if (msg.queryId && msg.queryStatus == 'in-progress') {
             pollAsyncQuery(msg.queryId, 0);
           }
         });
@@ -85,10 +87,35 @@ export const Home: React.FC = () => {
       return;
     }
 
+    if (result?.status == 'cancelled') {
+      handleQueryCancelled(queryId);
+      return;
+    }
+
     window.setTimeout(() => {
       pollAsyncQuery(queryId, attempt + 1);
     }, POLL_INTERVAL_MS);
   }
+
+  const handleQueryCancelled = useCallback((queryId: string) => {
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.queryId !== queryId) {
+          return msg;
+        }
+
+        const now = Date.now();
+
+        return {
+            ...msg,
+            id: `error-${now}`,
+            queryStatus: 'cancelled',
+            content: GENERIC_ERROR_MESSAGE,
+            timestamp: new Date().toISOString(),
+        };
+      })
+    );
+  }, [setMessages])
 
   const handleQuerySuccess = useCallback((queryId: string, response: any )=> {
     setMessages((prev) =>

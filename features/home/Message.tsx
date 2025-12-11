@@ -8,6 +8,7 @@ import {
   Save,
   X,
   MoreVertical,
+  AlertTriangle,
 } from 'lucide-react';
 import { Note, noteService } from '@services/note-service';
 import { getHeaderTitle } from '@utils';
@@ -602,6 +603,8 @@ export const Message: React.FC<MessageProps> = ({ message, styles }) => {
   const { messages: chatMessages, setMessages } = useChat();
   const isAI = message.type === 'ai';
   const isLoading = message.queryStatus === 'in-progress' || message.id.startsWith('loading-');
+  const isCancelled = message.queryStatus === 'cancelled' || message.id.startsWith('error-');
+  const errorDescription = message.content ? message.content : 'The server returned a 500 error while processing your request. Please try again.';
   const handleNotesChange = (updatedNotes: Note[]) => {
     const nextMessages = chatMessages.map((msg) =>
       msg.id === message.id ? { ...msg, notes: updatedNotes } : msg
@@ -631,26 +634,58 @@ export const Message: React.FC<MessageProps> = ({ message, styles }) => {
         <div style={styles.messageContent}>
           {isAI ? (
             <div>
-              <div style={{ marginBottom: '12px', fontSize: '15px', color: '#374151' }}>
-                {message.content}
-              </div>
-              {message.notes && message.notes.length > 0 && !isLoading ? (
-                <NotesDisplay
-                  notes={message.notes}
-                  styles={styles}
-                  intent={message.intent}
-                  messageContent={message.content}
-                  onNotesChange={handleNotesChange}
-                />
-              ) : !isLoading ? (
-                <NotesDisplay
-                  notes={[]}
-                  styles={styles}
-                  intent={message.intent}
-                  messageContent={message.content}
-                  onNotesChange={handleNotesChange}
-                />
-              ) : null}
+              {isCancelled ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '10px',
+                    padding: '12px',
+                    borderRadius: '12px',
+                    backgroundColor: '#fef2f2',
+                    border: '1px solid rgba(239, 68, 68, 0.25)',
+                    color: '#991b1b',
+                    alignItems: 'flex-start',
+                    marginBottom: '4px',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '10px',
+                      backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      color: '#ef4444',
+                    }}
+                  >
+                    <AlertTriangle size={16} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: '13px', marginBottom: '4px' }}>
+                      Server error (500)
+                    </div>
+                    <div style={{ fontSize: '13px', lineHeight: '1.5', color: '#b91c1c' }}>
+                      {errorDescription}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div style={{ marginBottom: '12px', fontSize: '15px', color: '#374151' }}>
+                    {message.content}
+                  </div>
+                  <NotesDisplay
+                    notes={message.notes ? message.notes : []}
+                    styles={styles}
+                    intent={message.intent}
+                    messageContent={message.content}
+                    onNotesChange={handleNotesChange}
+                  />
+                </>
+              )}
             </div>
           ) : isLoading ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>

@@ -49,16 +49,20 @@ class AsyncQueryService<T = QueryResponse> {
       })
       .catch((error) => {
         console.log('Failed to delegate async query to background script', error);
-        // handle error
+        throw error;
       });
   }
 
   async processQuery(queryObj: AsyncQuery<T>): Promise<void> {
     try {
       const response = (await queryService.sendQuery(queryObj.query)) as T;
+      let status:AsyncQueryStatus = 'completed';
+      if (!response.success) {
+        status = 'cancelled';
+      }
       const updatedQuery: AsyncQuery<T> = {
         ...queryObj,
-        status: 'completed',
+        status,
         response,
       };
       console.log("completed query " + queryObj.id)
