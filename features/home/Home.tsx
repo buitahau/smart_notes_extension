@@ -29,6 +29,11 @@ export const Home: React.FC = () => {
       const savedMessages = await storage.get<Message[]>(STORAGE_KEYS.CHAT_MESSAGES);
       if (savedMessages && savedMessages.length > 0) {
         setMessages(savedMessages);
+        savedMessages.forEach((msg) => {
+          if (msg.queryId && msg.queryStatus !== 'completed') {
+            pollAsyncQuery(msg.queryId, 0);
+          }
+        });
       } else {
         // Initialize welcome message if no messages exist
         setMessages([
@@ -47,6 +52,7 @@ export const Home: React.FC = () => {
 
   // Save messages to storage when they change
   useEffect(() => {
+    console.log("length:" + messages.length)
     if (messages.length > 0) {
       const lastFiveMessages = messages.slice(-5);
       storage.set(STORAGE_KEYS.CHAT_MESSAGES, lastFiveMessages);
@@ -125,7 +131,6 @@ export const Home: React.FC = () => {
       content: userInput,
       timestamp: new Date().toISOString(),
     };
-    setMessages([...messages, userMessage]);
 
     // Call query service
     try {
@@ -140,7 +145,7 @@ export const Home: React.FC = () => {
         queryId: asyncQueryId,
         queryStatus: 'in-progress'
       };
-      const updatedMessages = [...messages, loadingMessage];
+      const updatedMessages = [...messages, userMessage, loadingMessage];
       setMessages(updatedMessages);
 
       setInputText('');
@@ -154,7 +159,7 @@ export const Home: React.FC = () => {
         content: 'Sorry, I encountered an error while processing your request. Please try again.',
         timestamp: new Date().toISOString(),
       };
-      setMessages([...messages, errorResponse]);
+      setMessages([...messages, userMessage, errorResponse]);
     }
   };
 
