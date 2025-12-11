@@ -5,7 +5,6 @@ import { useMiniRouter } from '@context/router-context';
 import { useChat } from '@context/chat-context';
 import { STORAGE_KEYS } from '@utils/constants';
 import { UserDetails } from '@types/login';
-import { queryService } from '@services/query-service';
 import { Message } from '@context/chat-context';
 import { Header } from './Header';
 import { Message as MessageComponent } from './Message';
