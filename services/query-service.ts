@@ -2,7 +2,7 @@ import apiClient from './api-client';
 import { API_ENDPOINTS } from '@utils/constants';
 import { Note } from './note-service';
 
-interface QueryResponse {
+export interface QueryResponse {
   success: boolean;
   notes: {
     intent: string;

@@ -1,16 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { storage } from '@utils/storage';
 import { logout } from '@services/auth-service';
 import { useMiniRouter } from '@context/router-context';
 import { useChat } from '@context/chat-context';
 import { STORAGE_KEYS } from '@utils/constants';
 import { UserDetails } from '@types/login';
-import { queryService } from '@services/query-service';
 import { Message } from '@context/chat-context';
 import { Header } from './Header';
 import { Message as MessageComponent } from './Message';
 import { Input } from './Input';
 import { styles } from './styles';
+import { asyncQueryService } from '@services/async-query-service';
+
+const POLL_INTERVAL_MS = 2000;
+const MAX_POLL_ATTEMPTS = 15;
+const GENERIC_ERROR_MESSAGE =
+  'Sorry, I encountered an error while processing your request. Please try again.'
 
 export const Home: React.FC = () => {
   const [inputText, setInputText] = useState('');
@@ -26,6 +31,11 @@ export const Home: React.FC = () => {
       const savedMessages = await storage.get<Message[]>(STORAGE_KEYS.CHAT_MESSAGES);
       if (savedMessages && savedMessages.length > 0) {
         setMessages(savedMessages);
+        savedMessages.forEach((msg) => {
+          if (msg.queryId && msg.queryStatus == 'in-progress') {
+            pollAsyncQuery(msg.queryId, 0);
+          }
+        });
       } else {
         // Initialize welcome message if no messages exist
         setMessages([
@@ -44,6 +54,7 @@ export const Home: React.FC = () => {
 
   // Save messages to storage when they change
   useEffect(() => {
+    console.log("length:" + messages.length)
     if (messages.length > 0) {
       const lastFiveMessages = messages.slice(-5);
       storage.set(STORAGE_KEYS.CHAT_MESSAGES, lastFiveMessages);
@@ -53,6 +64,87 @@ export const Home: React.FC = () => {
   const handleCreateNote = () => {
     navigate('create-note');
   };
+
+  const pollAsyncQuery = useCallback((queryId: string, attempt = 0) => {
+    if (!queryId) {
+      return;
+    }
+
+    if (MAX_POLL_ATTEMPTS < attempt) {
+      console.log("stop polling " + queryId)
+      return;
+    }
+
+    checkStatus(queryId, attempt);
+  }, []);
+
+  const checkStatus = async(queryId: string, attempt: any) => {
+    const result = await asyncQueryService.get(queryId);
+    console.log("polling [" + queryId + " - " + attempt + " - " + result?.status + "] ...");
+
+    if (result?.status == 'completed') {
+      handleQuerySuccess(queryId, result.response);
+      return;
+    }
+
+    if (result?.status == 'cancelled') {
+      handleQueryCancelled(queryId);
+      return;
+    }
+
+    window.setTimeout(() => {
+      pollAsyncQuery(queryId, attempt + 1);
+    }, POLL_INTERVAL_MS);
+  }
+
+  const handleQueryCancelled = useCallback((queryId: string) => {
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.queryId !== queryId) {
+          return msg;
+        }
+
+        const now = Date.now();
+
+        return {
+            ...msg,
+            id: `error-${now}`,
+            queryStatus: 'cancelled',
+            content: GENERIC_ERROR_MESSAGE,
+            timestamp: new Date().toISOString(),
+        };
+      })
+    );
+  }, [setMessages])
+
+  const handleQuerySuccess = useCallback((queryId: string, response: any )=> {
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.queryId !== queryId) {
+          return msg;
+        }
+
+        const notesData = response?.notes;
+        const notesArray = Array.isArray(notesData?.data) ? notesData.data : [];
+
+        let content = 'No notes found.';
+        if (notesArray.length > 0) {
+          content = 'Here are your notes:';
+        }
+
+        return {
+            ...msg,
+            id: `ai-${Date.now()}`,
+            queryStatus: 'completed',
+            content,
+            notes: notesArray,
+            intent: notesData?.intent,
+            timestamp: new Date().toISOString(),
+        };
+      })
+    );
+
+  }, [setMessages])
 
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
@@ -67,68 +159,34 @@ export const Home: React.FC = () => {
       timestamp: new Date().toISOString(),
     };
 
-    // Show loading indicator
-    const loadingMessageId = `loading-${Date.now()}`;
-    const loadingMessage: Message = {
-      id: loadingMessageId,
-      type: 'ai',
-      content: 'Thinking',
-      timestamp: new Date().toISOString(),
-    };
-    const updatedMessages = [...messages, userMessage, loadingMessage];
-    setMessages(updatedMessages);
-
-    setInputText('');
-
     // Call query service
     try {
-      const response = await queryService.sendQuery(userInput.toLowerCase());
-      const notesData = response.notes;
+      const asyncQueryId = await asyncQueryService.create(userInput);
+      // Show loading indicator
+      const loadingMessageId = `loading-${Date.now()}`;
+      const loadingMessage: Message = {
+        id: loadingMessageId,
+        type: 'ai',
+        content: 'Thinking',
+        timestamp: new Date().toISOString(),
+        queryId: asyncQueryId,
+        queryStatus: 'in-progress'
+      };
+      const updatedMessages = [...messages, userMessage, loadingMessage];
+      setMessages(updatedMessages);
 
-      // Remove loading message and add AI response
-      const filteredMessages = updatedMessages.filter(
-        (msg: Message) => msg.id !== loadingMessageId
-      );
-      let aiResponse: Message;
+      setInputText('');
 
-      // Ensure notesData.data is always an array
-      const notesArray = Array.isArray(notesData.data) ? notesData.data : [];
-
-      if (
-        (notesData.intent === 'task_list' || notesData.intent === 'date_lookup') &&
-        notesArray.length > 0
-      ) {
-        aiResponse = {
-          id: `ai-${Date.now()}`,
-          type: 'ai',
-          content: 'Here are your tasks:',
-          timestamp: new Date().toISOString(),
-          notes: notesArray,
-          intent: notesData.intent,
-        };
-      } else {
-        aiResponse = {
-          id: `ai-${Date.now()}`,
-          type: 'ai',
-          content: notesArray.length > 0 ? 'Here are your notes:' : 'No notes found.',
-          timestamp: new Date().toISOString(),
-          notes: notesArray,
-          intent: notesData.intent,
-        };
-      }
-      setMessages([...filteredMessages, aiResponse]);
+      pollAsyncQuery(asyncQueryId, 0);
     } catch (error) {
-      // Remove loading message and add error response
-      const filteredMessages = updatedMessages.filter(
-        (msg: Message) => msg.id !== loadingMessageId
-      );
+      // Add error response
       const errorResponse: Message = {
         id: `error-${Date.now()}`,
         type: 'ai',
         content: 'Sorry, I encountered an error while processing your request. Please try again.',
         timestamp: new Date().toISOString(),
       };
-      setMessages([...filteredMessages, errorResponse]);
+      setMessages([...messages, userMessage, errorResponse]);
     }
   };
 
