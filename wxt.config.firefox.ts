@@ -55,7 +55,20 @@ export default defineConfig({
   manifest: {
     name: 'Smart Notes',
     description: 'Smart Notes Extension',
-    version: '1.1.0',
+    version: '1.0.0',
     permissions: ['storage'],
+    browser_specific_settings: {
+      gecko: {
+        id: "@smart-notes",
+        data_collection_permissions: {
+          required: [
+            "personallyIdentifyingInfo"
+          ],
+          optional: [
+            "technicalAndInteraction"
+          ]
+        }
+      }
+    },
   },
 });
