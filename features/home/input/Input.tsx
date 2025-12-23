@@ -1,21 +1,17 @@
 import React from 'react';
 import { Send as SendIcon } from 'lucide-react';
+import { inputStyles } from './styles';
 
 interface InputProps {
   inputText: string;
   onInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onSendMessage: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
-  styles: { [key: string]: React.CSSProperties };
 }
 
-export const Input: React.FC<InputProps> = ({
-  inputText,
-  onInputChange,
-  onSendMessage,
-  onKeyDown,
-  styles,
-}) => {
+// Chat composer that handles text entry and the send action in the footer.
+export const Input: React.FC<InputProps> = ({ inputText, onInputChange, onSendMessage, onKeyDown }) => {
+  const styles = inputStyles;
   return (
     <div style={styles.inputContainer}>
       <div

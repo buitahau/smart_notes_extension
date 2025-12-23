@@ -7,7 +7,7 @@ import {
   LogOut as LogOutIcon,
   Settings as SettingsIcon,
 } from 'lucide-react';
-import { useMiniRouter } from '@context/router-context';
+import { headerStyles } from './styles';
 
 interface HeaderProps {
   userName: string;
@@ -18,7 +18,6 @@ interface HeaderProps {
   onLogout: () => void;
   onCreateNote: () => void;
   userMenuRef: React.RefObject<HTMLDivElement>;
-  styles: { [key: string]: React.CSSProperties };
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -30,9 +29,8 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
   onCreateNote,
   userMenuRef,
-  styles,
 }) => {
-  const { navigate } = useMiniRouter();
+  const styles = headerStyles;
 
   return (
     <div style={styles.header}>
@@ -121,9 +119,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <button
-        style={{
-          ...styles.createButton,
-        }}
+        style={styles.createButton}
         onClick={onCreateNote}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor =
