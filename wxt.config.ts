@@ -49,6 +49,10 @@ export default defineConfig({
           find: '@guard',
           replacement: resolve(__dirname, './guard'),
         },
+        {
+          find: '@constants',
+          replacement: resolve(__dirname, './constants'),
+        },
       ],
     },
   }),
