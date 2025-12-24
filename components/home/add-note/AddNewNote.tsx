@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Save, X } from 'lucide-react';
 import { DatePicker } from './date-picker';
-import { formatDateDisplay } from '../../../features/home/date-utils';
+import { formatDateDisplay } from '@utils/date-utils';
 
 interface AddNewNoteProps {
   styles: { [key: string]: React.CSSProperties };

@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { Note, noteService } from '@services/note-service';
 import { getHeaderTitle } from '@utils';
-import { formatDateDisplay } from './date-utils';
+import { formatDateDisplay } from '@utils/date-utils';
 import { useChat } from '@context/chat-context';
 import { AddNewNote } from '@components/home/add-note/AddNewNote';
 
