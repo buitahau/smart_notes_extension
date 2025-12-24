@@ -6,10 +6,10 @@ import { useChat } from '@context/chat-context';
 import { STORAGE_KEYS } from '@utils/constants';
 import { UserDetails } from '@types/login';
 import { Message } from '@context/chat-context';
-import { Header } from './Header';
-import { Message as MessageComponent } from './Message';
-import { Input } from './Input';
-import { styles } from './styles';
+import { Header } from '@components/home/header/Header';
+import { Message as MessageComponent } from './message/Message';
+import { Input } from '@components/home/input/Input';
+import { styles, textContentStyles } from './home.styles';
 import { asyncQueryService } from '@services/async-query-service';
 
 const POLL_INTERVAL_MS = 2000;
@@ -259,121 +259,7 @@ export const Home: React.FC = () => {
   // Add CSS animations to the document
   useEffect(() => {
     const style = document.createElement('style');
-    style.textContent = `
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes slideInLeft {
-        from {
-          opacity: 0;
-          transform: translateX(-20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateX(0);
-        }
-      }
-
-      @keyframes slideInRight {
-        from {
-          opacity: 0;
-          transform: translateX(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateX(0);
-        }
-      }
-
-      @keyframes pulse {
-        0% {
-          box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
-        }
-        70% {
-          box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
-        }
-        100% {
-          box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
-        }
-      }
-
-      @keyframes gradient {
-        0% {
-          background-position: 0% 50%;
-        }
-        50% {
-          background-position: 100% 50%;
-        }
-        100% {
-          background-position: 0% 50%;
-        }
-      }
-
-      .message-bubble-ai {
-        animation: slideIn 0.4s ease-out;
-      }
-
-      .message-bubble-user {
-        animation: slideInRight 0.4s ease-out;
-      }
-
-      .avatar-glow {
-        animation: pulse 2s infinite;
-      }
-
-      .loading-dots {
-        display: inline-block;
-      }
-
-      .loading-dots::after {
-        content: '';
-        animation: loading-dots 1.5s infinite;
-      }
-
-      @keyframes loading-dots {
-        0% { content: ''; }
-        25% { content: '.'; }
-        50% { content: '..'; }
-        75% { content: '...'; }
-        100% { content: ''; }
-      }
-
-      textarea::placeholder {
-        color: '#9ca3af';
-        opacity: 0.7;
-      }
-
-      textarea:focus {
-        outline: none;
-      }
-
-      /* Custom scrollbar */
-      #messages-area::-webkit-scrollbar {
-        width: 6px;
-      }
-
-      #messages-area::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.1);
-        border-radius: 3px;
-      }
-
-      #messages-area::-webkit-scrollbar-thumb {
-        background: rgba(99, 102, 241, 0.3);
-        border-radius: 3px;
-      }
-
-      #messages-area::-webkit-scrollbar-thumb:hover {
-        background: rgba(99, 102, 241, 0.5);
-      }
-    `;
+    style.textContent = textContentStyles;
     document.head.appendChild(style);
 
     return () => {
@@ -401,7 +287,7 @@ export const Home: React.FC = () => {
         <div style={styles.messagesArea} id="messages-area">
           <div style={styles.messagesWrapper}>
             {messages.map((message) => (
-              <MessageComponent key={message.id} message={message} styles={styles} />
+              <MessageComponent key={message.id} message={message} />
             ))}
           </div>
         </div>

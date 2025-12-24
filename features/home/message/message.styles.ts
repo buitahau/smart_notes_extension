@@ -1,0 +1,93 @@
+import type { CSSProperties } from 'react';
+
+type MessageStyles = Record<string, CSSProperties>;
+
+export const styles: MessageStyles = {
+  messageWrapper: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    gap: '12px',
+    maxWidth: '100%',
+    animation: 'slideIn 0.3s ease-out',
+  },
+  messageWrapperAI: {
+    alignSelf: 'flex-start',
+    marginLeft: '0',
+    marginRight: 'auto',
+    animation: 'slideInLeft 0.3s ease-out',
+    width: '100%',
+  },
+  messageWrapperUser: {
+    alignSelf: 'flex-end',
+    marginLeft: 'auto',
+    marginRight: '0',
+    animation: 'slideInRight 0.3s ease-out',
+  },
+  avatar: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    position: 'relative',
+    overflow: 'hidden',
+    border: '2px solid rgba(255, 255, 255, 0.8)',
+  },
+  avatarAI: {
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  },
+  avatarUser: {
+    background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
+  },
+  messageBubble: {
+    padding: '14px 18px',
+    borderRadius: '18px',
+    maxWidth: '100%',
+    width: '100%',
+    position: 'relative',
+    fontSize: '14px',
+    lineHeight: '1.5',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  },
+  aiBubble: {
+    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+    borderBottomLeftRadius: '4px',
+    color: '#1f2937',
+    border: '1px solid rgba(229, 231, 235, 0.8)',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+  },
+  userBubble: {
+    background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
+    color: 'white',
+    borderBottomRightRadius: '4px',
+    border: '1px solid rgba(6, 182, 212, 0.3)',
+    boxShadow: '0 2px 8px rgba(6, 182, 212, 0.2)',
+  },
+  messageContent: {
+    wordBreak: 'break-word',
+    fontWeight: '400',
+    letterSpacing: '0.01em',
+    fontSize: '13px',
+  },
+  messageTime: {
+    fontSize: '11px',
+    opacity: 0.6,
+    marginTop: '6px',
+    fontWeight: '500',
+    letterSpacing: '0.02em',
+  },
+  messageTimeAI: {
+    textAlign: 'left',
+    color: '#9ca3af',
+  },
+  messageTimeUser: {
+    textAlign: 'right',
+    color: 'rgba(255, 255, 255, 0.85)',
+  },
+};
