@@ -54,7 +54,6 @@ export const Home: React.FC = () => {
 
   // Save messages to storage when they change
   useEffect(() => {
-    console.log("length:" + messages.length)
     if (messages.length > 0) {
       const lastFiveMessages = messages.slice(-5);
       storage.set(STORAGE_KEYS.CHAT_MESSAGES, lastFiveMessages);
