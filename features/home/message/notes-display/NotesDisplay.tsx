@@ -2,7 +2,7 @@ import React from 'react';
 import type { IntentDisplayProps } from './types';
 import { TaskListDisplay } from './task-list/task-list-display';
 import { DateLookupDisplay } from './date-lookup/date-lookup-display';
-import { GenericNotesDisplay } from './generic-notes-display';
+import { GenericNotesDisplay } from './generic-notes-display/generic-notes-display';
 
 const intentComponentMap: Record<string, React.FC<IntentDisplayProps>> = {
   task_list: TaskListDisplay,
