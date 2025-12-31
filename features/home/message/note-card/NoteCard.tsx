@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Edit2, MoreVertical, Save, Trash2, X } from 'lucide-react';
+import { Edit2, MoreVertical, Trash2 } from 'lucide-react';
 import { Note, noteService } from '@services/note-service';
 import { styles } from './note-card.styles';
+import { AddNewNote } from '../../../../components/home/add-note/AddNewNote';
 
 interface NoteCardProps {
   note: Note;
@@ -17,7 +18,6 @@ export const NoteCard: React.FC<NoteCardProps> = ({
   onNoteDelete,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedContent, setEditedContent] = useState(note.content);
   const [isCompleted, setIsCompleted] = useState(note.status === 'completed');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -35,10 +35,6 @@ export const NoteCard: React.FC<NoteCardProps> = ({
     };
   }, []);
 
-  useEffect(() => {
-    setEditedContent(note.content);
-  }, [note]);
-
   const handleComplete = () => {
     setIsCompleted(!isCompleted);
     // TODO: API call to update status
@@ -49,13 +45,13 @@ export const NoteCard: React.FC<NoteCardProps> = ({
     setIsEditing(true);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (content: string, date: string) => {
     if (isSaving) return;
     setIsSaving(true);
     try {
       const updatedNote = await noteService.updateNote(note.id, {
-        content: editedContent,
-        date: note.dateAt,
+        content,
+        date,
       });
       onNoteUpdate(updatedNote);
       setIsEditing(false);
@@ -68,7 +64,6 @@ export const NoteCard: React.FC<NoteCardProps> = ({
 
   const handleCancel = () => {
     setIsEditing(false);
-    setEditedContent(note.content);
   };
 
   const handleDelete = async () => {
@@ -90,43 +85,38 @@ export const NoteCard: React.FC<NoteCardProps> = ({
         zIndex: isMenuOpen ? 20 : 'auto',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor =
-          styles.noteCardHover.backgroundColor || 'rgba(255, 255, 255, 0.95)';
-        e.currentTarget.style.borderColor =
-          styles.noteCardHover.borderColor || 'rgba(99, 102, 241, 0.3)';
-        e.currentTarget.style.boxShadow =
-          styles.noteCardHover.boxShadow || '0 8px 24px rgba(0, 0, 0, 0.12)';
-        e.currentTarget.style.transform = styles.noteCardHover.transform || 'translateY(-2px)';
+        if (!isEditing) {
+          e.currentTarget.style.backgroundColor =
+            styles.noteCardHover.backgroundColor || 'rgba(255, 255, 255, 0.95)';
+          e.currentTarget.style.borderColor =
+            styles.noteCardHover.borderColor || 'rgba(99, 102, 241, 0.3)';
+          e.currentTarget.style.boxShadow =
+            styles.noteCardHover.boxShadow || '0 8px 24px rgba(0, 0, 0, 0.12)';
+          e.currentTarget.style.transform = styles.noteCardHover.transform || 'translateY(-2px)';
+        }
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor =
-          styles.noteCard.backgroundColor || 'rgba(255, 255, 255, 0.9)';
-        e.currentTarget.style.borderColor =
-          (styles.noteCard.border as string) || 'rgba(229, 231, 235, 0.6)';
-        e.currentTarget.style.boxShadow =
-          styles.noteCard.boxShadow || '0 2px 12px rgba(0, 0, 0, 0.08)';
-        e.currentTarget.style.transform = 'translateY(0)';
+        if (!isEditing) {
+          e.currentTarget.style.backgroundColor =
+            styles.noteCard.backgroundColor || 'rgba(255, 255, 255, 0.9)';
+          e.currentTarget.style.borderColor =
+            (styles.noteCard.border as string) || 'rgba(229, 231, 235, 0.6)';
+          e.currentTarget.style.boxShadow =
+            styles.noteCard.boxShadow || '0 2px 12px rgba(0, 0, 0, 0.08)';
+          e.currentTarget.style.transform = 'translateY(0)';
+        }
       }}
     >
       <div style={{ ...styles.noteContent, textDecoration: isCompleted ? 'line-through' : 'none' }}>
         {isEditing ? (
-          <textarea
-            value={editedContent}
-            onChange={(e) => setEditedContent(e.target.value)}
-            style={{
-              width: '100%',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              padding: '8px',
-              fontSize: '13px',
-              lineHeight: '1.4',
-              fontFamily: 'inherit',
-              resize: 'vertical',
-              minHeight: '60px',
-              outline: 'none',
-              boxSizing: 'border-box',
-            }}
-            autoFocus
+          <AddNewNote
+            styles={styles}
+            onSave={handleSave}
+            onCancel={handleCancel}
+            initialContent={note.content}
+            initialDate={new Date(note.dateAt)}
+            mode="edit"
+            isInline={true}
           />
         ) : (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -265,75 +255,6 @@ export const NoteCard: React.FC<NoteCardProps> = ({
           </div>
         )}
       </div>
-      {isEditing && (
-        <div
-          style={{
-            display: 'flex',
-            gap: '8px',
-            marginTop: '12px',
-            justifyContent: 'flex-end',
-          }}
-        >
-          <button
-            onClick={handleCancel}
-            disabled={isSaving}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '6px 12px',
-              backgroundColor: '#6b7280',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '12px',
-              cursor: isSaving ? 'not-allowed' : 'pointer',
-              opacity: isSaving ? 0.7 : 1,
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              if (!isSaving) {
-                e.currentTarget.style.backgroundColor = '#4b5563';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#6b7280';
-            }}
-          >
-            <X size={14} />
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '6px 12px',
-              backgroundColor: '#10b981',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '12px',
-              cursor: isSaving ? 'not-allowed' : 'pointer',
-              opacity: isSaving ? 0.7 : 1,
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              if (!isSaving) {
-                e.currentTarget.style.backgroundColor = '#059669';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#10b981';
-            }}
-          >
-            <Save size={14} />
-            Save
-          </button>
-        </div>
-      )}
     </div>
   );
 };
