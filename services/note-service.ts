@@ -9,16 +9,19 @@ export interface Note {
   updatedAt: string;
   userId: string;
   status?: 'pending' | 'completed';
+  category?: 'on-a-date' | 'information';
 }
 
 export interface CreateNoteRequest {
   content: string;
   date?: string;
+  category?: 'on-a-date' | 'information';
 }
 
 export interface UpdateNoteRequest {
   content: string;
   date?: string;
+  category?: 'on-a-date' | 'information';
 }
 
 export interface GetNotesOptions {

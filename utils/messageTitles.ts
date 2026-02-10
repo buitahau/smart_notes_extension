@@ -24,6 +24,8 @@ export const getHeaderTitle = (config: MessageTitleConfig): string => {
         return '';
       case 'date_lookup':
         return 'Related Notes';
+      case 'retrieve_information':
+        return 'Retrieved Information';
       default:
         return 'Notes';
     }
@@ -47,6 +49,8 @@ export const getHeaderTitle = (config: MessageTitleConfig): string => {
   switch (intent) {
     case 'date_lookup':
       return 'Related Notes';
+    case 'retrieve_information':
+      return 'Retrieved Information';
     default:
       return 'Notes';
   }
@@ -64,6 +68,8 @@ export const getEmptyState = (config: MessageTitleConfig): EmptyStateConfig => {
         return { icon: '📋', text: 'No tasks found for this time period.' };
       case 'date_lookup':
         return { icon: '🔍', text: 'No related notes found.' };
+      case 'retrieve_information':
+        return { icon: '🔍', text: 'No information found.' };
       default:
         return { icon: '📝', text: 'No notes found.' };
     }
@@ -95,6 +101,8 @@ export const getEmptyState = (config: MessageTitleConfig): EmptyStateConfig => {
   switch (intent) {
     case 'date_lookup':
       return { icon: '🔍', text: 'No related notes found.' };
+    case 'retrieve_information':
+      return { icon: '🔍', text: 'No information found.' };
     default:
       return { icon: '📝', text: 'No notes found.' };
   }

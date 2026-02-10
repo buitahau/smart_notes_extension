@@ -41,11 +41,12 @@ export const TaskListDisplay: React.FC<IntentDisplayProps> = ({
     });
   };
 
-  const handleAddNote = async (content: string, targetDate?: string) => {
+  const handleAddNote = async (content: string, targetDate?: string, category?: string) => {
     try {
       const createdNote = await noteService.createNote({
         content,
         date: targetDate || new Date().toISOString(),
+        category: category as 'on-a-date' | 'information',
       });
 
       setLocalNotes((prevNotes) => {
@@ -193,8 +194,9 @@ export const TaskListDisplay: React.FC<IntentDisplayProps> = ({
               isInline
               index={index}
               initialDate={new Date(dateString)}
-              onSave={(content, date) => {
-                handleAddNote(content, date);
+              initialCategory="on-a-date"
+              onSave={(content, date, category) => {
+                handleAddNote(content, date, category);
                 removeForm(dateString, formId);
               }}
               onCancel={() => removeForm(dateString, formId)}

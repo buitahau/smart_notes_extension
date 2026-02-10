@@ -1,6 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Edit2, MoreVertical, Save, Trash2, X } from 'lucide-react';
 import { Note, noteService } from '@services/note-service';
+import { CategorySelector } from '@components/home/add-note/category-selector';
+import { DatePicker } from '@components/home/add-note/date-picker';
+import { formatDateDisplay } from '@utils/date-utils';
+import { CategoryValue } from '@constants/category';
 import { styles } from './note-card.styles';
 
 interface NoteCardProps {
@@ -18,6 +22,13 @@ export const NoteCard: React.FC<NoteCardProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(note.content);
+  const [editedCategory, setEditedCategory] = useState<CategoryValue>(
+    note.category || 'on-a-date'
+  );
+  const [editedDate, setEditedDate] = useState<Date>(
+    note.dateAt ? new Date(note.dateAt) : new Date()
+  );
+  const [isDatePickerOpen, setDatePickerOpen] = useState(false);
   const [isCompleted, setIsCompleted] = useState(note.status === 'completed');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -37,6 +48,8 @@ export const NoteCard: React.FC<NoteCardProps> = ({
 
   useEffect(() => {
     setEditedContent(note.content);
+    setEditedCategory(note.category || 'on-a-date');
+    setEditedDate(note.dateAt ? new Date(note.dateAt) : new Date());
   }, [note]);
 
   const handleComplete = () => {
@@ -53,10 +66,23 @@ export const NoteCard: React.FC<NoteCardProps> = ({
     if (isSaving) return;
     setIsSaving(true);
     try {
-      const updatedNote = await noteService.updateNote(note.id, {
+      const updateData: any = {
         content: editedContent,
-        date: note.dateAt,
-      });
+        category: editedCategory,
+      };
+
+      // Only include date if category is 'on-a-date'
+      if (editedCategory === 'on-a-date') {
+        const year = editedDate.getFullYear();
+        const month = editedDate.getMonth();
+        const day = editedDate.getDate();
+        const utcDate = new Date(Date.UTC(year, month, day));
+        updateData.date = utcDate.toISOString();
+      } else {
+        updateData.date = '';
+      }
+
+      const updatedNote = await noteService.updateNote(note.id, updateData);
       onNoteUpdate(updatedNote);
       setIsEditing(false);
     } catch (error) {
@@ -69,6 +95,8 @@ export const NoteCard: React.FC<NoteCardProps> = ({
   const handleCancel = () => {
     setIsEditing(false);
     setEditedContent(note.content);
+    setEditedCategory(note.category || 'on-a-date');
+    setEditedDate(note.dateAt ? new Date(note.dateAt) : new Date());
   };
 
   const handleDelete = async () => {
@@ -110,24 +138,71 @@ export const NoteCard: React.FC<NoteCardProps> = ({
     >
       <div style={{ ...styles.noteContent, textDecoration: isCompleted ? 'line-through' : 'none' }}>
         {isEditing ? (
-          <textarea
-            value={editedContent}
-            onChange={(e) => setEditedContent(e.target.value)}
-            style={{
-              width: '100%',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              padding: '8px',
-              fontSize: '13px',
-              lineHeight: '1.4',
-              fontFamily: 'inherit',
-              resize: 'vertical',
-              minHeight: '60px',
-              outline: 'none',
-              boxSizing: 'border-box',
-            }}
-            autoFocus
-          />
+          <>
+            <CategorySelector
+              selectedCategory={editedCategory}
+              onCategoryChange={setEditedCategory}
+            />
+            {editedCategory === 'on-a-date' && (
+              <div
+                style={{
+                  fontSize: '12px',
+                  color: '#059669',
+                  marginBottom: '8px',
+                  fontWeight: '500',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  position: 'relative',
+                }}
+              >
+                Date:{' '}
+                <button
+                  onClick={() => setDatePickerOpen(true)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#059669',
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                    padding: '0',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                  }}
+                >
+                  {formatDateDisplay(editedDate.toISOString())}
+                </button>
+                {isDatePickerOpen && (
+                  <DatePicker
+                    selectedDate={editedDate}
+                    onDateChange={(newDate) => {
+                      setEditedDate(newDate);
+                      setDatePickerOpen(false);
+                    }}
+                    onClose={() => setDatePickerOpen(false)}
+                  />
+                )}
+              </div>
+            )}
+            <textarea
+              value={editedContent}
+              onChange={(e) => setEditedContent(e.target.value)}
+              style={{
+                width: '100%',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                padding: '8px',
+                fontSize: '13px',
+                lineHeight: '1.4',
+                fontFamily: 'inherit',
+                resize: 'vertical',
+                minHeight: '60px',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+              autoFocus
+            />
+          </>
         ) : (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>{note.content}</span>
@@ -173,35 +248,6 @@ export const NoteCard: React.FC<NoteCardProps> = ({
                       border: '1px solid #e5e7eb',
                     }}
                   >
-                    {/* TODO: Hide Mark as complete */}
-                    {/* <button
-                      onClick={() => {
-                        handleComplete();
-                        setIsMenuOpen(false);
-                      }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        width: '100%',
-                        padding: '8px 12px',
-                        backgroundColor: 'transparent',
-                        border: 'none',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        fontSize: '13px',
-                        color: '#374151',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#f3f4f6';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }}
-                    >
-                      <Check size={14} />
-                      {isCompleted ? 'Mark as Incomplete' : 'Mark as Complete'}
-                    </button> */}
                     <button
                       onClick={() => {
                         handleEdit();

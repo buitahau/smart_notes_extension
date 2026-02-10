@@ -27,7 +27,8 @@
       "@assets/*": ["./assets/*"],
       "@types/*": ["./types/*"],
       "@guard/*": ["./guard/*"],
-      "@context/*": ["./context/*"]
+      "@context/*": ["./context/*"],
+      "@constants/*": ["./constants/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"],

@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { Plus, Save, X } from 'lucide-react';
 import { DatePicker } from './date-picker';
+import { CategorySelector } from './category-selector';
 import { formatDateDisplay } from '@utils/date-utils';
+import { DEFAULT_CATEGORY, CategoryValue } from '@constants/category';
 
 interface AddNewNoteProps {
   styles: { [key: string]: React.CSSProperties };
-  onSave: (content: string, date: string) => void;
+  onSave: (content: string, date: string, category: CategoryValue) => void;
   onCancel?: () => void;
   initialDate?: Date;
+  initialCategory?: CategoryValue;
   isInline?: boolean;
   index?: number;
 }
@@ -17,20 +20,27 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
   onSave,
   onCancel,
   initialDate,
+  initialCategory,
   isInline,
   index,
 }: AddNewNoteProps) => {
   const [content, setContent] = useState('');
+  const [category, setCategory] = useState<CategoryValue>(initialCategory || DEFAULT_CATEGORY);
   const [selectedDate, setSelectedDate] = useState(initialDate || new Date());
   const [isDatePickerOpen, setDatePickerOpen] = useState(false);
 
   const handleSave = () => {
     if (content.trim()) {
-      const year = selectedDate.getFullYear();
-      const month = selectedDate.getMonth();
-      const day = selectedDate.getDate();
-      const utcDate = new Date(Date.UTC(year, month, day));
-      onSave(content.trim(), utcDate.toISOString());
+      if (category === 'on-a-date') {
+        const year = selectedDate.getFullYear();
+        const month = selectedDate.getMonth();
+        const day = selectedDate.getDate();
+        const utcDate = new Date(Date.UTC(year, month, day));
+        onSave(content.trim(), utcDate.toISOString(), category);
+      } else {
+        // Information category - no date
+        onSave(content.trim(), '', category);
+      }
     }
   };
 
@@ -51,8 +61,9 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
           backgroundColor: '#f0fdf4',
         }}
       >
+        <CategorySelector selectedCategory={category} onCategoryChange={setCategory} />
         <textarea
-          placeholder="Enter your task..."
+          placeholder="Enter your content..."
           value={content}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setContent(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -111,7 +122,7 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
   }
 
   const isSelectedDateDifferent =
-    selectedDate.toDateString() !== new Date(initialDate).toDateString();
+    initialDate && selectedDate.toDateString() !== new Date(initialDate).toDateString();
 
   return (
     <div
@@ -122,60 +133,65 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
         backgroundColor: '#f0fdf4',
         marginTop: '8px',
         marginBottom: '8px',
-        animation: `fadeInUp 0.3s ease ${index * 0.1}s both`,
+        animation: `fadeInUp 0.3s ease ${(index || 0) * 0.1}s both`,
         position: 'relative',
       }}
     >
-      <div
-        style={{
-          fontSize: '12px',
-          color: '#059669',
-          marginBottom: '8px',
-          fontWeight: '500',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          position: 'relative',
-        }}
-      >
-        <Plus size={14} />
-        Adding task for{' '}
-        <button
-          onClick={() => setDatePickerOpen(true)}
+      <CategorySelector selectedCategory={category} onCategoryChange={setCategory} />
+
+      {category === 'on-a-date' && (
+        <div
           style={{
-            background: 'none',
-            border: 'none',
-            color: isSelectedDateDifferent ? '#1f2937' : '#059669',
-            textDecoration: isSelectedDateDifferent ? 'underline' : 'none',
-            cursor: 'pointer',
-            padding: '0',
             fontSize: '12px',
-            fontWeight: '600',
-            borderRadius: '2px',
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(5, 150, 105, 0.1)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
+            color: '#059669',
+            marginBottom: '8px',
+            fontWeight: '500',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            position: 'relative',
           }}
         >
-          {formatDateDisplay(selectedDate.toISOString())}
-        </button>
-        {isDatePickerOpen && (
-          <DatePicker
-            selectedDate={selectedDate}
-            onDateChange={(newDate) => {
-              setSelectedDate(newDate);
-              setDatePickerOpen(false);
+          <Plus size={14} />
+          Adding task for{' '}
+          <button
+            onClick={() => setDatePickerOpen(true)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: isSelectedDateDifferent ? '#1f2937' : '#059669',
+              textDecoration: isSelectedDateDifferent ? 'underline' : 'none',
+              cursor: 'pointer',
+              padding: '0',
+              fontSize: '12px',
+              fontWeight: '600',
+              borderRadius: '2px',
+              transition: 'all 0.2s ease',
             }}
-            onClose={() => setDatePickerOpen(false)}
-          />
-        )}
-      </div>
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(5, 150, 105, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            {formatDateDisplay(selectedDate.toISOString())}
+          </button>
+          {isDatePickerOpen && (
+            <DatePicker
+              selectedDate={selectedDate}
+              onDateChange={(newDate) => {
+                setSelectedDate(newDate);
+                setDatePickerOpen(false);
+              }}
+              onClose={() => setDatePickerOpen(false)}
+            />
+          )}
+        </div>
+      )}
+
       <textarea
-        placeholder="Enter your task..."
+        placeholder={category === 'on-a-date' ? 'Enter your task...' : 'Enter your information...'}
         value={content}
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setContent(e.target.value)}
         onKeyDown={handleKeyDown}
