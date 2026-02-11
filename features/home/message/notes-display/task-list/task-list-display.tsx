@@ -5,6 +5,7 @@ import { noteService } from '@services/note-service';
 import { formatDateDisplay } from '@utils/date-utils';
 import { getHeaderTitle } from '@utils';
 import { NoteCard } from '@features/home/message/note-card/NoteCard';
+import { DEFAULT_CATEGORY, INFORMATION } from '@constants/category';
 import { styles } from '../notes-display.styles';
 import { groupNotesByDate } from '../utils';
 import type { IntentDisplayProps } from '../types';
@@ -41,11 +42,12 @@ export const TaskListDisplay: React.FC<IntentDisplayProps> = ({
     });
   };
 
-  const handleAddNote = async (content: string, targetDate?: string) => {
+  const handleAddNote = async (content: string, targetDate: string | undefined, category?: string) => {
     try {
       const createdNote = await noteService.createNote({
         content,
-        date: targetDate || new Date().toISOString(),
+        date: targetDate,
+        category: category || DEFAULT_CATEGORY,
       });
 
       setLocalNotes((prevNotes) => {
@@ -193,8 +195,8 @@ export const TaskListDisplay: React.FC<IntentDisplayProps> = ({
               isInline
               index={index}
               initialDate={new Date(dateString)}
-              onSave={(content, date) => {
-                handleAddNote(content, date);
+              onSave={(content, date, category) => {
+                handleAddNote(content, date, category);
                 removeForm(dateString, formId);
               }}
               onCancel={() => removeForm(dateString, formId)}
