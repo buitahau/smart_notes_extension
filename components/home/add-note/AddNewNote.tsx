@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Save, X } from 'lucide-react';
+import { Plus, Save, X, Edit2 } from 'lucide-react';
 import { DatePicker } from './date-picker';
 import { formatDateDisplay } from '@utils/date-utils';
 
@@ -8,8 +8,10 @@ interface AddNewNoteProps {
   onSave: (content: string, date: string) => void;
   onCancel?: () => void;
   initialDate?: Date;
+  initialContent?: string;
   isInline?: boolean;
   index?: number;
+  mode?: 'add' | 'edit';
 }
 
 export const AddNewNote: React.FC<AddNewNoteProps> = ({
@@ -17,10 +19,12 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
   onSave,
   onCancel,
   initialDate,
+  initialContent = '',
   isInline,
   index,
+  mode = 'add',
 }: AddNewNoteProps) => {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState(initialContent);
   const [selectedDate, setSelectedDate] = useState(initialDate || new Date());
   const [isDatePickerOpen, setDatePickerOpen] = useState(false);
 
@@ -111,7 +115,7 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
   }
 
   const isSelectedDateDifferent =
-    selectedDate.toDateString() !== new Date(initialDate).toDateString();
+    selectedDate.toDateString() !== new Date(initialDate || new Date()).toDateString();
 
   return (
     <div
@@ -122,7 +126,7 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
         backgroundColor: '#f0fdf4',
         marginTop: '8px',
         marginBottom: '8px',
-        animation: `fadeInUp 0.3s ease ${index * 0.1}s both`,
+        animation: index !== undefined ? `fadeInUp 0.3s ease ${index * 0.1}s both` : 'none',
         position: 'relative',
       }}
     >
@@ -138,8 +142,8 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
           position: 'relative',
         }}
       >
-        <Plus size={14} />
-        Adding task for{' '}
+        {mode === 'add' ? <Plus size={14} /> : <Edit2 size={14} />}
+        {mode === 'add' ? 'Adding task for ' : 'Editing task for '}
         <button
           onClick={() => setDatePickerOpen(true)}
           style={{

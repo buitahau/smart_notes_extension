@@ -8,6 +8,7 @@ import { Note } from '@services/note-service';
 import { useChat } from '@context/chat-context';
 import { NotesDisplay } from './notes-display/NotesDisplay';
 import { styles } from './message.styles';
+import { Thinking } from '@components/thinking/Thinking';
 
 interface MessageProps {
   message: {
@@ -54,7 +55,9 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
         className={isAI ? 'message-bubble-ai' : 'message-bubble-user'}
       >
         <div style={styles.messageContent}>
-          {isAI ? (
+          {isAI ? (isLoading ? (
+            <Thinking />
+          ) : (
             <div>
               {isCancelled ? (
                 <div
@@ -108,12 +111,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                 </>
               )}
             </div>
-          ) : isLoading ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span>Thinking</span>
-              <span className="loading-dots"></span>
-            </div>
-          ) : (
+          )) : (
             message.content.split('\n').map((line, i) => (
               <React.Fragment key={i}>
                 {line}

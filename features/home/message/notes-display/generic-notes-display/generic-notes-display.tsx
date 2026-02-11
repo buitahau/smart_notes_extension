@@ -1,8 +1,8 @@
 import React from 'react';
 import { getHeaderTitle } from '@utils';
 import { formatDateDisplay } from '@utils/date-utils';
-import { styles } from './notes-display.styles';
-import type { IntentDisplayProps } from './types';
+import { styles } from '../notes-display.styles';
+import type { IntentDisplayProps } from '../types';
 
 export const GenericNotesDisplay: React.FC<IntentDisplayProps> = ({
   notes,

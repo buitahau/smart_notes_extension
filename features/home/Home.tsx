@@ -8,7 +8,7 @@ import { UserDetails } from '@types/login';
 import { Message } from '@context/chat-context';
 import { Header } from '@components/home/header/Header';
 import { Message as MessageComponent } from './message/Message';
-import { Input } from '@components/home/input/Input';
+import { HomeQueryInput } from '@components/home/input/HomeQueryInput';
 import { styles, textContentStyles } from './home.styles';
 import { asyncQueryService } from '@services/async-query-service';
 
@@ -77,7 +77,7 @@ export const Home: React.FC = () => {
     checkStatus(queryId, attempt);
   }, []);
 
-  const checkStatus = async(queryId: string, attempt: any) => {
+  const checkStatus = async (queryId: string, attempt: any) => {
     const result = await asyncQueryService.get(queryId);
     console.log("polling [" + queryId + " - " + attempt + " - " + result?.status + "] ...");
 
@@ -106,17 +106,17 @@ export const Home: React.FC = () => {
         const now = Date.now();
 
         return {
-            ...msg,
-            id: `error-${now}`,
-            queryStatus: 'cancelled',
-            content: GENERIC_ERROR_MESSAGE,
-            timestamp: new Date().toISOString(),
+          ...msg,
+          id: `error-${now}`,
+          queryStatus: 'cancelled',
+          content: GENERIC_ERROR_MESSAGE,
+          timestamp: new Date().toISOString(),
         };
       })
     );
   }, [setMessages])
 
-  const handleQuerySuccess = useCallback((queryId: string, response: any )=> {
+  const handleQuerySuccess = useCallback((queryId: string, response: any) => {
     setMessages((prev) =>
       prev.map((msg) => {
         if (msg.queryId !== queryId) {
@@ -132,13 +132,13 @@ export const Home: React.FC = () => {
         }
 
         return {
-            ...msg,
-            id: `ai-${Date.now()}`,
-            queryStatus: 'completed',
-            content,
-            notes: notesArray,
-            intent: notesData?.intent,
-            timestamp: new Date().toISOString(),
+          ...msg,
+          id: `ai-${Date.now()}`,
+          queryStatus: 'completed',
+          content,
+          notes: notesArray,
+          intent: notesData?.intent,
+          timestamp: new Date().toISOString(),
         };
       })
     );
@@ -293,7 +293,7 @@ export const Home: React.FC = () => {
       </div>
 
       {/* Part 3: Text input area */}
-      <Input
+      <HomeQueryInput
         inputText={inputText}
         onInputChange={(e) => setInputText(e.target.value)}
         onSendMessage={handleSendMessage}
