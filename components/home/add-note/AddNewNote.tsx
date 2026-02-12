@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { Plus, Save, X, Edit2 } from 'lucide-react';
 import { DatePicker } from './date-picker';
 import { formatDateDisplay } from '@utils/date-utils';
+import { CATEGORY_OPTIONS, CategoryValue, DEFAULT_CATEGORY, INFORMATION } from '@constants/category';
 
 interface AddNewNoteProps {
   styles: { [key: string]: React.CSSProperties };
-  onSave: (content: string, date: string) => void;
+  onSave: (content: string, date: string | undefined, category: string) => void;
   onCancel?: () => void;
   initialDate?: Date;
   initialContent?: string;
+  initialCategory?: CategoryValue;
   isInline?: boolean;
   index?: number;
   mode?: 'add' | 'edit';
@@ -20,12 +22,16 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
   onCancel,
   initialDate,
   initialContent = '',
+  initialCategory,
   isInline,
   index,
   mode = 'add',
 }: AddNewNoteProps) => {
   const [content, setContent] = useState(initialContent);
   const [selectedDate, setSelectedDate] = useState(initialDate || new Date());
+  const [selectedCategory, setSelectedCategory] = useState<CategoryValue>(
+    initialCategory !== undefined ? initialCategory : DEFAULT_CATEGORY
+  );
   const [isDatePickerOpen, setDatePickerOpen] = useState(false);
 
   const handleSave = () => {
@@ -34,7 +40,8 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
       const month = selectedDate.getMonth();
       const day = selectedDate.getDate();
       const utcDate = new Date(Date.UTC(year, month, day));
-      onSave(content.trim(), utcDate.toISOString());
+      const dateToSave = selectedCategory === INFORMATION ? undefined : utcDate.toISOString();
+      onSave(content.trim(), dateToSave, selectedCategory);
     }
   };
 
@@ -144,29 +151,31 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
       >
         {mode === 'add' ? <Plus size={14} /> : <Edit2 size={14} />}
         {mode === 'add' ? 'Adding task for ' : 'Editing task for '}
-        <button
-          onClick={() => setDatePickerOpen(true)}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: isSelectedDateDifferent ? '#1f2937' : '#059669',
-            textDecoration: isSelectedDateDifferent ? 'underline' : 'none',
-            cursor: 'pointer',
-            padding: '0',
-            fontSize: '12px',
-            fontWeight: '600',
-            borderRadius: '2px',
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(5, 150, 105, 0.1)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }}
-        >
-          {formatDateDisplay(selectedDate.toISOString())}
-        </button>
+        {selectedCategory !== INFORMATION && (
+          <button
+            onClick={() => setDatePickerOpen(true)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: isSelectedDateDifferent ? '#1f2937' : '#059669',
+              textDecoration: isSelectedDateDifferent ? 'underline' : 'none',
+              cursor: 'pointer',
+              padding: '0',
+              fontSize: '12px',
+              fontWeight: '600',
+              borderRadius: '2px',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(5, 150, 105, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            {formatDateDisplay(selectedDate.toISOString())}
+          </button>
+        )}
         {isDatePickerOpen && (
           <DatePicker
             selectedDate={selectedDate}
@@ -177,6 +186,74 @@ export const AddNewNote: React.FC<AddNewNoteProps> = ({
             onClose={() => setDatePickerOpen(false)}
           />
         )}
+      </div>
+      <div style={{ marginBottom: '8px' }}>
+        <label
+          style={{
+            fontSize: '12px',
+            fontWeight: '600',
+            color: '#374151',
+            display: 'block',
+            marginBottom: '6px',
+          }}
+        >
+          Category
+        </label>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'stretch',
+            gap: '6px',
+            padding: '2px',
+            borderRadius: '999px',
+            backgroundColor: '#f3f4f6',
+            border: '1px solid #e5e7eb',
+          }}
+        >
+          {CATEGORY_OPTIONS.map((category) => (
+            <label
+              key={category.value}
+              style={{
+                position: 'relative',
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '6px 10px',
+                borderRadius: '999px',
+                border: '1px solid transparent',
+                backgroundColor:
+                  selectedCategory === category.value ? '#ffffff' : 'transparent',
+                color: selectedCategory === category.value ? '#1f2937' : '#4b5563',
+                fontSize: '11px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition:
+                  'background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
+                letterSpacing: '-0.01em',
+                borderColor: selectedCategory === category.value ? '#4c51bf' : 'transparent',
+                boxShadow:
+                  selectedCategory === category.value
+                    ? '0 4px 10px rgba(76, 81, 191, 0.15)'
+                    : 'none',
+              }}
+            >
+              <input
+                type="radio"
+                value={category.value}
+                checked={selectedCategory === category.value}
+                onChange={(e) => setSelectedCategory(e.target.value as CategoryValue)}
+                style={{
+                  position: 'absolute',
+                  opacity: 0,
+                  pointerEvents: 'none',
+                  inset: 0,
+                }}
+              />
+              {category.label}
+            </label>
+          ))}
+        </div>
       </div>
       <textarea
         placeholder="Enter your task..."

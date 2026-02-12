@@ -1,5 +1,6 @@
 import apiClient from './api-client';
 import { API_ENDPOINTS } from '@utils/constants';
+import { CategoryValue } from '@constants/category';
 
 export interface Note {
   id: string;
@@ -9,16 +10,20 @@ export interface Note {
   updatedAt: string;
   userId: string;
   status?: 'pending' | 'completed';
+  category?: CategoryValue;
 }
 
 export interface CreateNoteRequest {
   content: string;
   date?: string;
+  category?: string;
 }
 
 export interface UpdateNoteRequest {
   content: string;
   date?: string;
+  category?: string;
+  status?: 'pending' | 'completed';
 }
 
 export interface GetNotesOptions {

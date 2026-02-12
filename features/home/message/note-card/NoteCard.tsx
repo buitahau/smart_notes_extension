@@ -45,13 +45,14 @@ export const NoteCard: React.FC<NoteCardProps> = ({
     setIsEditing(true);
   };
 
-  const handleSave = async (content: string, date: string) => {
+  const handleSave = async (content: string, date: string | undefined, category: string) => {
     if (isSaving) return;
     setIsSaving(true);
     try {
       const updatedNote = await noteService.updateNote(note.id, {
         content,
         date,
+        category,
       });
       onNoteUpdate(updatedNote);
       setIsEditing(false);
@@ -115,6 +116,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({
             onCancel={handleCancel}
             initialContent={note.content}
             initialDate={new Date(note.dateAt)}
+            initialCategory={note.category}
             mode="edit"
             isInline={true}
           />

@@ -1,10 +1,10 @@
-export const ON_A_DATE = 'on_a_date';
+export const ON_A_DATE = 'on-a-date';
+export const INFORMATION = 'information';
 
-export const DEFAULT_CATEGORY = ON_A_DATE;
+export const DEFAULT_CATEGORY = INFORMATION;
 
 export const CATEGORY_OPTIONS = [
-  { label: 'Daily', value: 'daily' },
-  { label: 'Someday', value: 'someday' },
+  { label: 'Information', value: INFORMATION },
   { label: 'On a Date', value: ON_A_DATE },
 ] as const;
 
